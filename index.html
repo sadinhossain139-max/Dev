@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr Dulal | Senior Developer & Telegram Automation Architect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        tg: {
+                            blue: '#2AABEE',
+                            dark: '#229ED9',
+                            glow: 'rgba(42, 171, 238, 0.25)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #060913;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(42, 171, 238, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(42, 171, 238, 0.2);
+        }
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(42, 171, 238, 0.12) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.06); }
+        }
+        .glow-orb {
+            animation: pulseGlow 8s ease-in-out infinite;
+        }
+        /* Custom scrollbar for bot chat */
+        .chat-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: rgba(42, 171, 238, 0.4);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-grid-pattern selection:bg-tg-blue selection:text-white relative min-h-screen flex flex-col">
+
+    <!-- Ambient Glowing Background Orbs -->
+    <div class="fixed top-[-10%] left-[-10%] w-96 h-96 rounded-full bg-tg-blue/20 blur-[130px] pointer-events-none glow-orb z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-96 h-96 rounded-full bg-emerald-500/15 blur-[130px] pointer-events-none glow-orb z-0"></div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="glass-card border-tg-blue/50 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-check text-sm"></i>
+            </div>
+            <div>
+                <p id="toast-title" class="text-sm font-semibold text-white">Copied to clipboard!</p>
+                <p id="toast-desc" class="text-xs text-slate-400">Ready to paste anywhere.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Navigation Header -->
+    <header class="sticky top-0 z-40 glass-card border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-tg-blue to-emerald-500 p-[1px] shadow-lg shadow-tg-blue/20">
+                    <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center group-hover:bg-transparent transition-colors">
+                        <span class="font-mono font-bold text-lg text-white">MD</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Mr Dulal
+                        <i class="fa-solid fa-circle-check text-tg-blue text-xs" title="Verified Senior Developer"></i>
+                    </span>
+                    <span class="block text-xs font-mono text-slate-400">Senior Developer</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#about" class="hover:text-tg-blue transition-colors">About</a>
+                <a href="#skills" class="hover:text-tg-blue transition-colors">Tech Stack</a>
+                <a href="#projects" class="hover:text-tg-blue transition-colors">Projects</a>
+                <a href="#services" class="hover:text-tg-blue transition-colors">Services</a>
+                <a href="#contact" class="hover:text-tg-blue transition-colors">Contact</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer"
+                   class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-white/10 transition-all"
+                   title="GitHub Profile">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </a>
+                <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer"
+                   class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-tg-blue to-sky-500 hover:from-sky-400 hover:to-tg-blue text-white font-semibold text-sm shadow-lg shadow-tg-blue/25 flex items-center gap-2 transition-all">
+                    <i class="fa-brands fa-telegram text-base"></i>
+                    <span>@MrDulal</span>
+                </a>
+            </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2.5 rounded-xl bg-slate-800/80 text-slate-200 border border-white/10">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-white/10 bg-slate-950/95 px-4 pt-3 pb-6 space-y-3">
+            <a href="#about" class="mobile-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white">About</a>
+            <a href="#skills" class="mobile-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white">Tech Stack</a>
+            <a href="#projects" class="mobile-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white">Projects (TgFlow & Agent)</a>
+            <a href="#services" class="mobile-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white">Services</a>
+            <a href="#contact" class="mobile-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 hover:text-white">Contact</a>
+            <div class="pt-2 flex gap-3">
+                <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 rounded-xl bg-tg-blue text-center text-white font-semibold text-sm">
+                    <i class="fa-brands fa-telegram mr-1"></i> Telegram @MrDulal
+                </a>
+                <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow relative z-10">
+
+        <!-- HERO SECTION -->
+        <section id="about" class="pt-12 pb-20 md:pt-20 md:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Column: Bio & Headlines -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>ONLINE & AVAILABLE FOR CUSTOM PROJECTS</span>
+                    </div>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white">
+                        Hi, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-tg-blue via-sky-300 to-emerald-400">Mr Dulal</span>
+                    </h1>
+
+                    <div class="text-xl sm:text-2xl font-mono text-slate-300 flex flex-wrap items-center gap-2 min-h-[2.5rem]">
+                        <span class="text-tg-blue font-bold">&gt;</span>
+                        <span>Senior Developer building</span>
+                        <span id="typewriter" class="text-emerald-400 font-semibold border-r-2 border-tg-blue pr-1">Telegram Bots</span>
+                    </div>
+
+                    <p class="text-slate-400 text-base sm:text-lg leading-relaxed max-w-2xl">
+                        I specialize in high-performance <strong class="text-slate-200">Python & JavaScript engineering</strong>, advanced <strong class="text-slate-200">Telegram Automation</strong>, custom <strong class="text-slate-200">Telegram Web Apps (Mini Apps)</strong>, and full-scale automated marketplaces like <span class="text-tg-blue font-mono">TgFlow</span> and autonomous <span class="text-emerald-400 font-mono">Agent</span> systems. From bespoke frontend designs to automated backend workflows, I turn complex ideas into fast, reliable products.
+                    </p>
+
+                    <!-- Primary CTAs -->
+                    <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer"
+                           class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-tg-blue to-sky-500 hover:from-sky-400 hover:to-tg-blue text-white font-semibold shadow-xl shadow-tg-blue/25 flex items-center gap-2.5 transition-all transform hover:-translate-y-0.5">
+                            <i class="fa-brands fa-telegram text-xl"></i>
+                            <span>Chat on Telegram</span>
+                        </a>
+                        <a href="#projects"
+                           class="px-6 py-3.5 rounded-2xl glass-card hover:bg-slate-800/80 text-white font-semibold border border-white/15 flex items-center gap-2.5 transition-all">
+                            <i class="fa-solid fa-layer-group text-tg-blue"></i>
+                            <span>Explore Projects</span>
+                        </a>
+                        <button onclick="copyText('dulaldeveloper@gmail.com', 'Email Copied!')"
+                                class="px-4 py-3.5 rounded-2xl glass-card hover:bg-slate-800/80 text-slate-300 hover:text-white border border-white/10 flex items-center gap-2 text-sm font-mono transition-all"
+                                title="Click to copy email">
+                            <i class="fa-regular fa-envelope text-emerald-400"></i>
+                            <span class="hidden sm:inline">dulaldeveloper@gmail.com</span>
+                            <i class="fa-regular fa-copy text-xs opacity-70"></i>
+                        </button>
+                    </div>
+
+                    <!-- Highlight Metrics -->
+                    <div class="pt-6 grid grid-cols-3 gap-4 border-t border-white/10 max-w-lg">
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-extrabold text-white font-mono">24/7</div>
+                            <div class="text-xs text-slate-400 mt-0.5">Bot & Agent Uptime</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-extrabold text-tg-blue font-mono">100%</div>
+                            <div class="text-xs text-slate-400 mt-0.5">Custom Architecture</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">Full-Stack</div>
+                            <div class="text-xs text-slate-400 mt-0.5">Python • JS • TMA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Telegram Bot Simulator -->
+                <div class="lg:col-span-5">
+                    <div class="glass-card rounded-3xl border border-white/15 shadow-2xl overflow-hidden">
+                        <!-- Simulator Top Bar -->
+                        <div class="bg-slate-900/90 px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-tg-blue to-emerald-400 flex items-center justify-center text-white font-bold">
+                                        <i class="fa-solid fa-robot"></i>
+                                    </div>
+                                    <span class="w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900 absolute bottom-0 right-0"></span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                                        MrDulal Assistant Bot
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-tg-blue/20 text-tg-blue font-mono">BOT</span>
+                                    </div>
+                                    <div class="text-xs text-emerald-400 font-mono">online • interactive preview</div>
+                                </div>
+                            </div>
+                            <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-tg-blue hover:underline flex items-center gap-1">
+                                <span>Open Real Chat</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+
+                        <!-- Chat Messages Container -->
+                        <div id="bot-chat-box" class="p-5 h-72 overflow-y-auto chat-scroll space-y-3 bg-slate-950/60 text-sm">
+                            <div class="flex items-start gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-tg-blue/20 border border-tg-blue/40 flex items-center justify-center text-tg-blue text-xs shrink-0 mt-1">
+                                    <i class="fa-solid fa-terminal"></i>
+                                </div>
+                                <div class="bg-slate-800/90 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%] border border-white/5 leading-relaxed">
+                                    👋 Welcome! I'm <strong>Mr Dulal's Interactive Bot</strong>. Click any command below to test my automation capabilities:
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Bot Command Buttons -->
+                        <div class="p-4 bg-slate-900/90 border-t border-white/10">
+                            <div class="text-[11px] font-mono text-slate-400 mb-2 flex items-center justify-between">
+                                <span>QUICK BOT COMMANDS:</span>
+                                <button onclick="resetBotChat()" class="text-slate-400 hover:text-white transition-colors">
+                                    <i class="fa-solid fa-rotate-right mr-1"></i>Reset
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button onclick="sendBotCommand('/tgflow')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-tg-blue/20 hover:border-tg-blue/50 border border-white/10 text-xs font-mono text-sky-300 transition-all">
+                                    /tgflow
+                                </button>
+                                <button onclick="sendBotCommand('/agent')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-emerald-500/20 hover:border-emerald-500/50 border border-white/10 text-xs font-mono text-emerald-300 transition-all">
+                                    /agent
+                                </button>
+                                <button onclick="sendBotCommand('/stack')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-purple-500/20 hover:border-purple-500/50 border border-white/10 text-xs font-mono text-purple-300 transition-all">
+                                    /stack
+                                </button>
+                                <button onclick="sendBotCommand('/hire')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-500/50 border border-white/10 text-xs font-mono text-amber-300 transition-all">
+                                    /hire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TECH STACK & SKILLS SECTION -->
+        <section id="skills" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="px-3.5 py-1.5 rounded-full bg-tg-blue/10 border border-tg-blue/30 text-tg-blue text-xs font-mono uppercase tracking-wider">
+                    Core Arsenal
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">
+                    Tech Stack &amp; Specialized Tools
+                </h2>
+                <p class="text-slate-400 mt-3 text-base">
+                    Combining clean backend logic with modern responsive interfaces to build automated systems that scale effortlessly.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Category 1: Telegram Ecosystem -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-tg-blue/15 border border-tg-blue/30 flex items-center justify-center text-tg-blue text-xl mb-5">
+                        <i class="fa-brands fa-telegram"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Telegram Ecosystem</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        End-to-end custom bots, userbots, automated marketplaces, and seamless in-app Mini Apps.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-sky-300 border border-white/5">Telegram Bot API</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-sky-300 border border-white/5">Telegram Web Apps</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-sky-300 border border-white/5">Aiogram / Pyrogram</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-sky-300 border border-white/5">Telethon</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-sky-300 border border-white/5">Auto-Marketplace</span>
+                    </div>
+                </div>
+
+                <!-- Category 2: Backend & Automation -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl mb-5">
+                        <i class="fa-brands fa-python"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Python &amp; Automation</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        High-concurrency workflows, autonomous agents, custom CLI/GUI tools, and API integrations.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-emerald-300 border border-white/5">Python 3</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-emerald-300 border border-white/5">Asyncio</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-emerald-300 border border-white/5">Custom Agents</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-emerald-300 border border-white/5">Webhooks &amp; REST</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-emerald-300 border border-white/5">Task Automation</span>
+                    </div>
+                </div>
+
+                <!-- Category 3: Web & Frontend -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mb-5">
+                        <i class="fa-brands fa-js"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Web &amp; Custom UI</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Modern, ultra-responsive websites, admin dashboards, and interactive web applications.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-amber-300 border border-white/5">JavaScript (ES6+)</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-amber-300 border border-white/5">HTML5</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-amber-300 border border-white/5">CSS3 / Tailwind</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-amber-300 border border-white/5">Custom Design</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-amber-300 border border-white/5">Responsive UI</span>
+                    </div>
+                </div>
+
+                <!-- Category 4: Custom Developer Tools -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl mb-5">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Developer Tools &amp; Ops</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Custom utility scripts, payment gateways, database management, and cloud deployment.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-purple-300 border border-white/5">Custom Tools</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-purple-300 border border-white/5">Git &amp; GitHub</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-purple-300 border border-white/5">Payment APIs</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-purple-300 border border-white/5">SQL / NoSQL</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-800/90 text-xs font-mono text-purple-300 border border-white/5">Linux VPS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURED PROJECTS SECTION -->
+        <section id="projects" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div>
+                    <span class="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono uppercase tracking-wider">
+                        Portfolio Showcase
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">
+                        Featured Systems &amp; Projects
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-base max-w-2xl">
+                        Explore my flagship automation platforms, marketplaces, and custom web applications.
+                    </p>
+                </div>
+
+                <!-- Category Filter Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterProjects('all')" data-filter="all" class="project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-tg-blue text-white transition-all">
+                        All Systems
+                    </button>
+                    <button onclick="filterProjects('marketplace')" data-filter="marketplace" class="project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-slate-800/80 text-slate-300 hover:text-white border border-white/10 transition-all">
+                        Marketplace &amp; Bots
+                    </button>
+                    <button onclick="filterProjects('automation')" data-filter="automation" class="project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-slate-800/80 text-slate-300 hover:text-white border border-white/10 transition-all">
+                        Agents &amp; Tools
+                    </button>
+                    <button onclick="filterProjects('web')" data-filter="web" class="project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-slate-800/80 text-slate-300 hover:text-white border border-white/10 transition-all">
+                        Web &amp; Mini Apps
+                    </button>
+                </div>
+            </div>
+
+            <!-- Projects Grid -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                
+                <!-- Project 1: TgFlow -->
+                <div data-category="marketplace" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-tg-blue/30 relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-tg-blue/20 text-tg-blue text-xs font-mono font-semibold border border-tg-blue/30">
+                                ★ Flagship Marketplace
+                            </span>
+                            <span class="text-xs font-mono text-emerald-400 flex items-center gap-1">
+                                <i class="fa-solid fa-bolt"></i> Automated
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white group-hover:text-tg-blue transition-colors">
+                            TgFlow — Auto Marketplace
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            A complete, automated Telegram marketplace &amp; workflow ecosystem. Handles instant digital product delivery, automated order verification, user wallet management, and real-time admin analytics without manual intervention.
+                        </p>
+                        <ul class="mt-4 space-y-1.5 text-xs text-slate-300 font-mono">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-tg-blue"></i> 24/7 Automated Checkout &amp; Delivery</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-tg-blue"></i> Multi-Role Admin &amp; Seller Panel</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-tg-blue"></i> Custom Webhook &amp; Payment Sync</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Python</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Telegram API</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">JS</span>
+                        </div>
+                        <button onclick="openProjectModal('TgFlow')" class="text-xs font-mono font-semibold text-tg-blue hover:text-sky-300 flex items-center gap-1">
+                            <span>Inspect</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 2: Agent -->
+                <div data-category="automation" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-emerald-500/30 relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold border border-emerald-500/30">
+                                ★ Autonomous System
+                            </span>
+                            <span class="text-xs font-mono text-sky-400 flex items-center gap-1">
+                                <i class="fa-solid fa-microchip"></i> Smart Engine
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white group-hover:text-emerald-400 transition-colors">
+                            Agent — Smart Automation Bot
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Intelligent automation agent engineered for complex Telegram &amp; web operations. Executes scheduled tasks, multi-channel monitoring, smart auto-responses, and custom business logic at high speed.
+                        </p>
+                        <ul class="mt-4 space-y-1.5 text-xs text-slate-300 font-mono">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Event-Driven Task Execution</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Custom Rules &amp; Smart Filtering</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> High-Speed Async Python Core</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Python</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Asyncio</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Bot API</span>
+                        </div>
+                        <button onclick="openProjectModal('Agent')" class="text-xs font-mono font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                            <span>Inspect</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 3: Telegram Web App (TMA) Suite -->
+                <div data-category="web" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-mono font-semibold border border-purple-500/30">
+                                Telegram Mini App
+                            </span>
+                            <span class="text-xs font-mono text-slate-400">Web App</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white group-hover:text-purple-400 transition-colors">
+                            Custom Telegram Web Apps
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Interactive full-screen Mini Apps launched directly inside Telegram. Features native Telegram theme integration, user authentication validation, interactive dashboards, and instant storefront checkouts.
+                        </p>
+                        <ul class="mt-4 space-y-1.5 text-xs text-slate-300 font-mono">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400"></i> Native Telegram WebApp SDK</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400"></i> Seamless Bot-to-Web Data Sync</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400"></i> Mobile-First Custom UI/UX</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">JS</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">HTML/CSS</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">TMA SDK</span>
+                        </div>
+                        <button onclick="openProjectModal('TMA')" class="text-xs font-mono font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+                            <span>Inspect</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 4: Custom Telegram Bots -->
+                <div data-category="marketplace" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-mono font-semibold border border-sky-500/30">
+                                Custom Bots
+                            </span>
+                            <span class="text-xs font-mono text-slate-400">Multi-Purpose</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-white group-hover:text-sky-400 transition-colors">
+                            Bespoke Telegram Bot Systems
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Tailor-made bots for community management, subscription billing, customer support ticketing, crypto/payment alerts, and automated group moderation.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Python</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Webhooks</span>
+                        </div>
+                        <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="text-xs font-mono font-semibold text-sky-400 hover:underline">
+                            Request Demo &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 5: Custom Automation Tools -->
+                <div data-category="automation" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-mono font-semibold border border-amber-500/30">
+                                Custom Tools
+                            </span>
+                            <span class="text-xs font-mono text-slate-400">Scripts &amp; APIs</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-white group-hover:text-amber-400 transition-colors">
+                            Workflow &amp; Data Automation Suite
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Custom-built Python and JS tools designed to eliminate repetitive work—featuring API bridges, data parsers, bulk account utilities, and real-time notification pipelines.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">Python</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">REST API</span>
+                        </div>
+                        <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="text-xs font-mono font-semibold text-amber-400 hover:underline">
+                            View GitHub &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 6: Custom Website & UI Design -->
+                <div data-category="web" class="project-card glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-mono font-semibold border border-pink-500/30">
+                                Web &amp; Custom Design
+                            </span>
+                            <span class="text-xs font-mono text-slate-400">Full-Stack</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-white group-hover:text-pink-400 transition-colors">
+                            Modern Websites &amp; Admin Portals
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            High-converting landing pages, SaaS dashboards, and custom web portals built with clean HTML5, modern CSS, and interactive JavaScript for maximum speed on mobile and desktop.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">HTML5</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">CSS3</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] font-mono text-slate-300">JS</span>
+                        </div>
+                        <a href="#contact" class="text-xs font-mono font-semibold text-pink-400 hover:underline">
+                            Start a Project &rarr;
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SERVICES SECTION -->
+        <section id="services" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono uppercase tracking-wider">
+                    What I Deliver
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">
+                    Custom Development Services
+                </h2>
+                <p class="text-slate-400 mt-3 text-base">
+                    Whether you need an automated marketplace like TgFlow, a custom Telegram Mini App, or a complete website design, I build every project from the ground up.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-3xl p-7 border border-white/10">
+                    <div class="w-11 h-11 rounded-xl bg-tg-blue/20 text-tg-blue flex items-center justify-center text-lg font-bold mb-4">
+                        01
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Telegram Bots &amp; Auto-Marketplaces</h3>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                        Complete automated stores, TgFlow-style workflow systems, payment integration, member management, and custom bot commands built for reliability.
+                    </p>
+                </div>
+
+                <div class="glass-card rounded-3xl p-7 border border-white/10">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg font-bold mb-4">
+                        02
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Telegram Web Apps &amp; Websites</h3>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                        Custom-designed websites and interactive Telegram Mini Apps (TMA) that look sleek on every device and connect directly with your backend or bot.
+                    </p>
+                </div>
+
+                <div class="glass-card rounded-3xl p-7 border border-white/10">
+                    <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg font-bold mb-4">
+                        03
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Custom Python Tools &amp; Agents</h3>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                        Autonomous Agent scripts, custom software tools, API integrations, and task automation that save hours of manual work every day.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT & DIRECT HIRE SECTION -->
+        <section id="contact" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                
+                <!-- Left Column: Direct Contact Cards -->
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="px-3.5 py-1.5 rounded-full bg-tg-blue/10 border border-tg-blue/30 text-tg-blue text-xs font-mono uppercase tracking-wider">
+                        Direct Contact
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+                        Let's Build Your Next System
+                    </h2>
+                    <p class="text-slate-400 text-base leading-relaxed">
+                        Have an idea for a Telegram bot, automated marketplace, custom tool, or website? Reach out directly on Telegram or Email for a fast response.
+                    </p>
+
+                    <div class="space-y-4 pt-2">
+                        <!-- Telegram Card -->
+                        <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-tg-blue/30">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-xl bg-tg-blue/20 text-tg-blue flex items-center justify-center text-2xl">
+                                    <i class="fa-brands fa-telegram"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-mono text-slate-400">Telegram (Fastest Response)</div>
+                                    <div class="text-base font-bold text-white">@MrDulal</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="copyText('@MrDulal', 'Telegram Username Copied!')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="Copy Username">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-tg-blue hover:bg-sky-400 text-white text-xs font-semibold transition-all">
+                                    Message
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Email Card -->
+                        <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-white/10">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-mono text-slate-400">Direct Email</div>
+                                    <div class="text-sm sm:text-base font-bold text-white truncate">dulaldeveloper@gmail.com</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="copyText('dulaldeveloper@gmail.com', 'Email Address Copied!')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="Copy Email">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <a href="mailto:dulaldeveloper@gmail.com" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-all">
+                                    Email
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- GitHub Card -->
+                        <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-white/10">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-xl bg-slate-800 text-white flex items-center justify-center text-2xl">
+                                    <i class="fa-brands fa-github"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-mono text-slate-400">GitHub Profile</div>
+                                    <div class="text-sm sm:text-base font-bold text-white">sadinhossain139-max</div>
+                                </div>
+                            </div>
+                            <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-all">
+                                Visit GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Project Brief Builder -->
+                <div class="lg:col-span-7">
+                    <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white/15">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-tg-blue"></i>
+                            <span>Quick Project Message Builder</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-6">
+                            Select what you need below and send your inquiry directly to <strong>@MrDulal</strong> on Telegram or via Email.
+                        </p>
+
+                        <form id="inquiry-form" onsubmit="handleInquirySubmit(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-mono text-slate-300 mb-1.5">YOUR NAME / HANDLE</label>
+                                    <input type="text" id="client-name" required placeholder="e.g. Alex (@alex_dev)"
+                                           class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-white/10 text-white text-sm focus:outline-none focus:border-tg-blue">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-mono text-slate-300 mb-1.5">PROJECT CATEGORY</label>
+                                    <select id="project-type"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-white/10 text-white text-sm focus:outline-none focus:border-tg-blue">
+                                        <option value="Telegram Bot / Automation">Telegram Bot / Automation</option>
+                                        <option value="Marketplace System (like TgFlow)">Marketplace System (like TgFlow)</option>
+                                        <option value="Autonomous Agent / Python Tool">Autonomous Agent / Python Tool</option>
+                                        <option value="Telegram Web App (Mini App)">Telegram Web App (Mini App)</option>
+                                        <option value="Custom Website & UI Design">Custom Website &amp; UI Design</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-mono text-slate-300 mb-1.5">PROJECT DETAILS</label>
+                                <textarea id="project-details" rows="4" required placeholder="Tell me about the features, bot workflows, or website design you want to build..."
+                                          class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-white/10 text-white text-sm focus:outline-none focus:border-tg-blue"></textarea>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-3 pt-2">
+                                <button type="submit"
+                                        class="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-tg-blue to-sky-500 hover:from-sky-400 hover:to-tg-blue text-white font-semibold text-sm shadow-lg shadow-tg-blue/25 flex items-center justify-center gap-2 transition-all">
+                                    <i class="fa-brands fa-telegram text-lg"></i>
+                                    <span>Send via Telegram (@MrDulal)</span>
+                                </button>
+                                <button type="button" onclick="sendViaEmail()"
+                                        class="py-3.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm border border-white/10 flex items-center justify-center gap-2 transition-all">
+                                    <i class="fa-regular fa-envelope"></i>
+                                    <span>Send via Email</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- PROJECT ARCHITECTURE MODAL -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-tg-blue/40 shadow-2xl relative">
+            <button onclick="closeProjectModal()" class="absolute top-5 right-5 w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modal-badge" class="inline-block px-3 py-1 rounded-full bg-tg-blue/20 text-tg-blue text-xs font-mono mb-3">
+                System Overview
+            </div>
+            <h3 id="modal-title" class="text-2xl font-extrabold text-white">Project Title</h3>
+            <p id="modal-desc" class="text-slate-300 text-sm mt-3 leading-relaxed"></p>
+            <div class="mt-5 pt-4 border-t border-white/10">
+                <div class="text-xs font-mono text-slate-400 mb-2">KEY CAPABILITIES:</div>
+                <ul id="modal-features" class="space-y-2 text-xs font-mono text-emerald-300"></ul>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 rounded-xl bg-tg-blue hover:bg-sky-400 text-center text-white font-semibold text-sm">
+                    <i class="fa-brands fa-telegram mr-1"></i> Discuss on Telegram
+                </a>
+                <button onclick="closeProjectModal()" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 py-8 px-4 sm:px-6 lg:px-8 relative z-10 bg-slate-950/60">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-white">Mr Dulal</span>
+                <span>•</span>
+                <span>Senior Developer (Python, JS, Telegram Bots &amp; Web Apps)</span>
+            </div>
+            <div class="flex items-center gap-5">
+                <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="hover:text-tg-blue transition-colors">@MrDulal</a>
+                <a href="mailto:dulaldeveloper@gmail.com" class="hover:text-emerald-400 transition-colors">dulaldeveloper@gmail.com</a>
+                <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 1. Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // 2. Dynamic Typewriter Effect in Hero
+        const roles = [
+            "Telegram Bots & Automation",
+            "TgFlow Auto-Marketplaces",
+            "Autonomous Agent Systems",
+            "Telegram Web Apps (Mini Apps)",
+            "Custom Python & JS Tools",
+            "Modern Custom Websites"
+        ];
+        let roleIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typewriterEl = document.getElementById('typewriter');
+
+        function runTypewriter() {
+            const currentRole = roles[roleIndex];
+            if (isDeleting) {
+                typewriterEl.textContent = currentRole.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterEl.textContent = currentRole.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let speed = isDeleting ? 35 : 75;
+            if (!isDeleting && charIndex === currentRole.length) {
+                speed = 1800;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                roleIndex = (roleIndex + 1) % roles.length;
+                speed = 350;
+            }
+            setTimeout(runTypewriter, speed);
+        }
+        runTypewriter();
+
+        // 3. Interactive Telegram Bot Simulator
+        const chatBox = document.getElementById('bot-chat-box');
+        const botResponses = {
+            '/tgflow': {
+                title: '🛒 TgFlow Marketplace Engine',
+                text: 'TgFlow is Mr Dulal\'s automated Telegram marketplace platform. It supports instant auto-delivery, user wallets, order management, and custom payment gateways.'
+            },
+            '/agent': {
+                title: '🤖 Autonomous Agent System',
+                text: 'The Agent system runs 24/7 in Python to automate complex Telegram workflows, smart monitoring, auto-replies, and multi-channel task execution.'
+            },
+            '/stack': {
+                title: '⚡ Core Tech Stack',
+                text: 'Python, JavaScript, HTML5, CSS3, Telegram Bot API, Telegram Web Apps (Mini Apps), Asyncio, and Custom UI/UX Design.'
+            },
+            '/hire': {
+                title: '📬 Direct Contact',
+                text: 'Ready to start? Message @MrDulal directly on Telegram or email dulaldeveloper@gmail.com!'
+            }
+        };
+
+        function sendBotCommand(cmd) {
+            // User bubble
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex justify-end';
+            userMsg.innerHTML = `<div class="bg-tg-blue text-white rounded-2xl rounded-tr-sm px-4 py-2 text-xs font-mono shadow">${cmd}</div>`;
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Bot response bubble
+            const response = botResponses[cmd];
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'flex items-start gap-2.5';
+                botMsg.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-tg-blue/20 border border-tg-blue/40 flex items-center justify-center text-tg-blue text-xs shrink-0 mt-1">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-slate-800/90 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%] border border-white/5 leading-relaxed">
+                        <div class="font-bold text-tg-blue text-xs mb-1">${response.title}</div>
+                        <div class="text-xs text-slate-300">${response.text}</div>
+                    </div>
+                `;
+                chatBox.appendChild(botMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 220);
+        }
+
+        function resetBotChat() {
+            chatBox.innerHTML = `
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-tg-blue/20 border border-tg-blue/40 flex items-center justify-center text-tg-blue text-xs shrink-0 mt-1">
+                        <i class="fa-solid fa-terminal"></i>
+                    </div>
+                    <div class="bg-slate-800/90 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%] border border-white/5 leading-relaxed">
+                        👋 Chat reset! Click any command below (<code>/tgflow</code>, <code>/agent</code>, <code>/stack</code>, or <code>/hire</code>) to test the bot.
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4. Project Filtering
+        function filterProjects(category) {
+            document.querySelectorAll('.project-filter-btn').forEach(btn => {
+                if (btn.dataset.filter === category) {
+                    btn.className = 'project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-tg-blue text-white transition-all';
+                } else {
+                    btn.className = 'project-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold bg-slate-800/80 text-slate-300 hover:text-white border border-white/10 transition-all';
+                }
+            });
+
+            document.querySelectorAll('.project-card').forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // 5. Project Inspection Modal
+        const projectDetailsData = {
+            'TgFlow': {
+                badge: 'Automated Marketplace System',
+                title: 'TgFlow — Telegram Auto-Marketplace',
+                desc: 'Designed and engineered by Mr Dulal to automate digital goods & service marketplaces inside Telegram. Eliminates manual seller bottlenecks with automated inventory, instant delivery, and secure wallet flows.',
+                features: [
+                    '✓ Instant automated product & license delivery',
+                    '✓ Integrated user balance, top-up & order history',
+                    '✓ Real-time admin broadcast & sales analytics panel',
+                    '✓ Built with Python, Asyncio & Telegram Bot API'
+                ]
+            },
+            'Agent': {
+                badge: 'Autonomous Python Engine',
+                title: 'Agent — Smart Automation System',
+                desc: 'A high-speed autonomous agent built to handle continuous background tasks, intelligent message routing, custom triggers, and multi-platform API synchronization.',
+                features: [
+                    '✓ 24/7 asynchronous background task execution',
+                    '✓ Custom filtering, auto-forwarding & smart replies',
+                    '✓ Seamless integration with external REST APIs',
+                    '✓ Engineered for low latency and high reliability'
+                ]
+            },
+            'TMA': {
+                badge: 'Telegram Mini App (Web App)',
+                title: 'Custom Telegram Web Apps',
+                desc: 'Full-featured web applications that launch natively inside Telegram. Combines rich HTML/CSS/JS interfaces with real-time Telegram bot authentication.',
+                features: [
+                    '✓ Native Telegram WebApp SDK integration',
+                    '✓ Custom responsive storefront & dashboard UI',
+                    '✓ Instant cryptographic initData user verification',
+                    '✓ Smooth dark-mode adaptive animations'
+                ]
+            }
+        };
+
+        function openProjectModal(key) {
+            const data = projectDetailsData[key];
+            if (!data) return;
+            document.getElementById('modal-badge').textContent = data.badge;
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-desc').textContent = data.desc;
+            const listEl = document.getElementById('modal-features');
+            listEl.innerHTML = data.features.map(f => `<li>${f}</li>`).join('');
+            const modal = document.getElementById('project-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeProjectModal() {
+            const modal = document.getElementById('project-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // 6. Clipboard Helper & Custom Toast
+        function copyText(text, titleMessage) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(titleMessage, text);
+        }
+
+        let toastTimer;
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-desc').textContent = desc;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // 7. Quick Inquiry Form Handlers
+        function handleInquirySubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('client-name').value.trim();
+            const type = document.getElementById('project-type').value;
+            const details = document.getElementById('project-details').value.trim();
+            const message = `Hi Mr Dulal! I'm ${name}.\nProject Type: ${type}\nDetails: ${details}`;
+            copyText(message, 'Message copied! Opening Telegram...');
+            const tgUrl = `https://t.me/MrDulal?text=${encodeURIComponent(message)}`;
+            window.open(tgUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function sendViaEmail() {
+            const name = document.getElementById('client-name').value.trim() || 'Client';
+            const type = document.getElementById('project-type').value;
+            const details = document.getElementById('project-details').value.trim();
+            const subject = encodeURIComponent(`Project Inquiry: ${type} - from ${name}`);
+            const body = encodeURIComponent(`Hi Mr Dulal,\n\nName: ${name}\nProject Category: ${type}\n\nProject Details:\n${details}`);
+            window.location.href = `mailto:dulaldeveloper@gmail.com?subject=${subject}&body=${body}`;
+        }
+    </script>
+</body>
+</html>
