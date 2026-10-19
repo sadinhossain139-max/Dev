@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Dulal — Senior Developer & Telegram Automation Architect</title>
+<meta name="description" content="Mr Dulal — Senior Developer. Telegram bots, TgFlow auto-marketplaces, autonomous agents, Mini Apps, custom Python & JS systems.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter','sans-serif'],
+        mono: ['"JetBrains Mono"','monospace'],
+        disp: ['"Space Grotesk"','sans-serif'],
+      },
+      colors: {
+        void:  '#05060a',
+        panel: '#0d1117',
+        line:  '#161b27',
+        phos:  '#00ff9c',
+        sig:   '#2aabee',
+        amber: '#ffb454',
+        ghost: '#e6edf3',
+        fog:   '#8b949e',
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root{
+    --phos:#00ff9c; --sig:#2aabee; --amber:#ffb454; --void:#05060a; --panel:#0d1117;
+  }
+  html{ background:var(--void); }
+  body{
+    background-color:var(--void);
+    color:#e6edf3;
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    cursor:none;
+  }
+  @media (pointer:coarse){ body{cursor:auto;} #cursor-dot,#cursor-ring{display:none;} }
+
+  /* ---------- custom cursor ---------- */
+  #cursor-dot{
+    position:fixed; top:0; left:0; width:8px; height:8px; border-radius:50%;
+    background:var(--phos); z-index:9999; pointer-events:none;
+    transform:translate(-50%,-50%); mix-blend-mode:screen;
+    box-shadow:0 0 12px rgba(0,255,156,.8);
+  }
+  #cursor-ring{
+    position:fixed; top:0; left:0; width:36px; height:36px; border-radius:50%;
+    border:1px solid rgba(42,171,238,.55); z-index:9998; pointer-events:none;
+    transform:translate(-50%,-50%);
+    transition:width .25s ease, height .25s ease, border-color .25s ease, background .25s ease;
+  }
+  #cursor-ring.hovering{
+    width:56px; height:56px; border-color:var(--phos);
+    background:rgba(0,255,156,.06);
+  }
+
+  /* ---------- background layers ---------- */
+  #matrix-canvas{ position:fixed; inset:0; z-index:0; opacity:.16; pointer-events:none; }
+  .grid-overlay{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(42,171,238,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,171,238,.045) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse at center, black 30%, transparent 85%);
+  }
+  .scanlines{
+    position:fixed; inset:0; z-index:60; pointer-events:none; opacity:.05;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  .orb{ position:absolute; border-radius:50%; filter:blur(120px); pointer-events:none; }
+
+  /* ---------- boot preloader ---------- */
+  #boot{
+    position:fixed; inset:0; z-index:100; background:var(--void);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    transition:opacity .7s ease, visibility .7s;
+  }
+  #boot.done{ opacity:0; visibility:hidden; }
+  #boot-log{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--phos); width:min(560px,90vw); height:190px; overflow:hidden; }
+  #boot-log .dim{ color:#8b949e; }
+  #boot-log .blue{ color:var(--sig); }
+  .boot-cursor{ display:inline-block; width:9px; height:15px; background:var(--phos); vertical-align:-2px; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  /* ---------- glass / cards ---------- */
+  .gcard{
+    background:linear-gradient(160deg, rgba(13,17,23,.92), rgba(13,17,23,.75));
+    border:1px solid rgba(230,237,243,.08);
+    backdrop-filter:blur(14px);
+    position:relative;
+  }
+  .gcard::before{
+    content:''; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(140deg, rgba(0,255,156,.35), transparent 30%, transparent 70%, rgba(42,171,238,.35));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    opacity:0; transition:opacity .35s ease; pointer-events:none;
+  }
+  .gcard:hover::before{ opacity:1; }
+  .lift{ transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease; }
+  .lift:hover{ transform:translateY(-6px); box-shadow:0 24px 50px -20px rgba(0,255,156,.18), 0 12px 30px -14px rgba(42,171,238,.15); }
+
+  .tilt{ transform-style:preserve-3d; transition:transform .18s ease-out; will-change:transform; }
+  .tilt .tilt-inner{ transform:translateZ(34px); }
+
+  /* ---------- terminal window ---------- */
+  .term{
+    background:#0a0e14; border:1px solid rgba(0,255,156,.18); border-radius:14px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 30px 70px -30px rgba(0,255,156,.15), 0 20px 60px -30px rgba(42,171,238,.2);
+    overflow:hidden;
+  }
+  .term-head{
+    display:flex; align-items:center; gap:8px; padding:11px 16px;
+    background:rgba(22,27,39,.9); border-bottom:1px solid rgba(230,237,243,.07);
+  }
+  .term-dot{ width:11px; height:11px; border-radius:50%; }
+  .tok-k{ color:#ff7b72; } .tok-s{ color:#a5d6ff; } .tok-f{ color:#d2a8ff; }
+  .tok-c{ color:#7d8590; font-style:italic; } .tok-n{ color:#79c0ff; } .tok-g{ color:#00ff9c; }
+  .tok-amber{ color:#ffb454; }
+
+  /* ---------- typewriter ---------- */
+  .tw-caret{ display:inline-block; width:10px; height:1.15em; background:var(--phos); margin-left:3px; vertical-align:text-bottom; animation:blink 1s steps(1) infinite; box-shadow:0 0 10px rgba(0,255,156,.7); }
+
+  /* ---------- buttons ---------- */
+  .btn-primary{
+    background:linear-gradient(135deg,#2aabee,#0077b6);
+    box-shadow:0 10px 30px -10px rgba(42,171,238,.55), inset 0 1px 0 rgba(255,255,255,.2);
+    transition:transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); filter:brightness(1.12); box-shadow:0 16px 40px -10px rgba(42,171,238,.7); }
+  .btn-ghost{
+    border:1px solid rgba(0,255,156,.3); color:var(--phos);
+    transition:all .25s ease; background:rgba(0,255,156,.04);
+  }
+  .btn-ghost:hover{ background:rgba(0,255,156,.12); box-shadow:0 0 24px rgba(0,255,156,.18); transform:translateY(-2px); }
+
+  .tag{
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    padding:4px 10px; border-radius:8px; background:rgba(22,27,39,.9);
+    border:1px solid rgba(230,237,243,.08); color:#8b949e;
+  }
+  .tag:hover{ color:var(--phos); border-color:rgba(0,255,156,.35); }
+
+  /* ---------- nav ---------- */
+  #nav{ transition:background .35s ease, border-color .35s ease, box-shadow .35s; }
+  #nav.scrolled{ background:rgba(5,6,10,.82); backdrop-filter:blur(16px); border-color:rgba(0,255,156,.15); box-shadow:0 10px 40px -18px rgba(0,255,156,.2); }
+  .nav-link{ position:relative; }
+  .nav-link::after{
+    content:''; position:absolute; left:0; bottom:-4px; width:0; height:1px;
+    background:var(--phos); transition:width .3s ease; box-shadow:0 0 8px rgba(0,255,156,.8);
+  }
+  .nav-link:hover::after{ width:100%; }
+  #scroll-progress{
+    position:fixed; top:0; left:0; height:2px; z-index:70; width:0%;
+    background:linear-gradient(90deg,var(--sig),var(--phos));
+    box-shadow:0 0 12px rgba(0,255,156,.7);
+  }
+
+  /* ---------- section labels ---------- */
+  .sec-label{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.25em;
+    text-transform:uppercase; color:var(--phos);
+    display:inline-flex; align-items:center; gap:10px;
+  }
+  .sec-label::before{ content:''; width:34px; height:1px; background:linear-gradient(90deg,transparent,var(--phos)); }
+
+  /* ---------- chat ---------- */
+  .chat-scroll::-webkit-scrollbar{ width:5px; }
+  .chat-scroll::-webkit-scrollbar-track{ background:transparent; }
+  .chat-scroll::-webkit-scrollbar-thumb{ background:rgba(0,255,156,.35); border-radius:99px; }
+  .cmd-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:8px 6px; border-radius:10px;
+    background:rgba(22,27,39,.9); border:1px solid rgba(230,237,243,.09); color:#8b949e;
+    transition:all .22s ease;
+  }
+  .cmd-btn:hover{ transform:translateY(-2px); }
+  .cmd-btn[data-cmd="/tgflow"]:hover{ color:#79c0ff; border-color:rgba(121,192,255,.5); box-shadow:0 0 16px rgba(121,192,255,.2); }
+  .cmd-btn[data-cmd="/agent"]:hover{ color:var(--phos); border-color:rgba(0,255,156,.5); box-shadow:0 0 16px rgba(0,255,156,.2); }
+  .cmd-btn[data-cmd="/stack"]:hover{ color:#d2a8ff; border-color:rgba(210,168,255,.5); box-shadow:0 0 16px rgba(210,168,255,.2); }
+  .cmd-btn[data-cmd="/hire"]:hover{ color:var(--amber); border-color:rgba(255,180,84,.5); box-shadow:0 0 16px rgba(255,180,84,.2); }
+  .cmd-btn[data-cmd="/status"]:hover{ color:#ff7b72; border-color:rgba(255,123,114,.5); box-shadow:0 0 16px rgba(255,123,114,.2); }
+  .typing-dots span{ display:inline-block; width:5px; height:5px; border-radius:50%; background:#8b949e; margin-right:3px; animation:tbounce 1.2s infinite; }
+  .typing-dots span:nth-child(2){ animation-delay:.15s; } .typing-dots span:nth-child(3){ animation-delay:.3s; }
+  @keyframes tbounce{ 0%,60%,100%{transform:translateY(0);opacity:.4;} 30%{transform:translateY(-4px);opacity:1;} }
+
+  /* ---------- skill bars ---------- */
+  .skill-track{ height:5px; border-radius:99px; background:rgba(230,237,243,.07); overflow:hidden; }
+  .skill-fill{ height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--sig),var(--phos)); box-shadow:0 0 10px rgba(0,255,156,.5); transition:width 1.4s cubic-bezier(.22,1,.36,1); }
+
+  /* ---------- marquee ---------- */
+  .marquee{ display:flex; gap:0; width:max-content; animation:marq 32s linear infinite; }
+  .marquee:hover{ animation-play-state:paused; }
+  @keyframes marq{ to{ transform:translateX(-50%); } }
+
+  /* ---------- timeline ---------- */
+  .tl-item{ position:relative; padding-left:44px; }
+  .tl-item::before{
+    content:''; position:absolute; left:11px; top:8px; bottom:-28px; width:1px;
+    background:linear-gradient(180deg, rgba(0,255,156,.5), rgba(42,171,238,.12));
+  }
+  .tl-item:last-child::before{ display:none; }
+  .tl-node{
+    position:absolute; left:4px; top:6px; width:15px; height:15px; border-radius:50%;
+    background:var(--void); border:2px solid var(--phos); box-shadow:0 0 12px rgba(0,255,156,.6);
+  }
+
+  /* ---------- flow diagram ---------- */
+  .flow-node{ transition:all .3s ease; }
+  .flow-node:hover{ border-color:var(--phos); box-shadow:0 0 26px rgba(0,255,156,.2); transform:translateY(-3px); }
+  .pulse-line{ stroke-dasharray:6 6; animation:dashmove 1.4s linear infinite; }
+  @keyframes dashmove{ to{ stroke-dashoffset:-24; } }
+
+  /* ---------- faq ---------- */
+  .faq-body{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.22,1,.36,1); }
+  .faq-item.open .faq-body{ max-height:260px; }
+  .faq-item.open .faq-chevron{ transform:rotate(180deg); }
+  .faq-chevron{ transition:transform .35s ease; }
+
+  /* ---------- palette ---------- */
+  #palette{
+    position:fixed; inset:0; z-index:90; background:rgba(5,6,10,.75); backdrop-filter:blur(8px);
+    display:none; align-items:flex-start; justify-content:center; padding-top:14vh;
+  }
+  #palette.open{ display:flex; }
+  #palette-box{ width:min(620px,92vw); }
+  .pal-item{ display:flex; align-items:center; gap:14px; padding:13px 18px; border-radius:12px; cursor:pointer; }
+  .pal-item.active, .pal-item:hover{ background:rgba(0,255,156,.08); }
+  .pal-item.active .pal-title{ color:var(--phos); }
+
+  /* ---------- misc ---------- */
+  ::selection{ background:var(--phos); color:var(--void); }
+  .chat-scroll, body::-webkit-scrollbar{ width:9px; }
+  body::-webkit-scrollbar-track{ background:var(--void); }
+  body::-webkit-scrollbar-thumb{ background:linear-gradient(180deg,var(--sig),var(--phos)); border-radius:99px; }
+  .reveal{ opacity:0; transform:translateY(36px); }
+  .stat-num{ font-family:'JetBrains Mono',monospace; }
+  #toast{ transition:transform .4s cubic-bezier(.22,1,.36,1), opacity .4s; }
+  .filter-btn{ transition:all .25s ease; }
+  .filter-btn.active{ background:var(--phos); color:var(--void); border-color:var(--phos); box-shadow:0 0 20px rgba(0,255,156,.35); }
+  .glow-text{ text-shadow:0 0 26px rgba(42,171,238,.5); }
+  .glow-green{ text-shadow:0 0 26px rgba(0,255,156,.5); }
+</style>
+</head>
+<body class="min-h-screen flex flex-col relative antialiased">
+
+<!-- ============ BOOT PRELOADER ============ -->
+<div id="boot">
+  <div id="boot-log"></div>
+  <div class="mt-6 font-mono text-xs text-fog tracking-widest">ESTABLISHING SECURE SESSION<span class="boot-cursor ml-1"></span></div>
+</div>
+
+<!-- ============ CURSOR ============ -->
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<!-- ============ BACKGROUND ============ -->
+<canvas id="matrix-canvas"></canvas>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+<div class="fixed top-[-15%] left-[-10%] w-[34rem] h-[34rem] orb bg-sig/15 z-0"></div>
+<div class="fixed bottom-[-15%] right-[-10%] w-[34rem] h-[34rem] orb bg-phos/10 z-0"></div>
+<div id="scroll-progress"></div>
+
+<!-- ============ COMMAND PALETTE ============ -->
+<div id="palette">
+  <div id="palette-box" class="gcard rounded-2xl overflow-hidden shadow-2xl">
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-line">
+      <i class="fa-solid fa-terminal text-phos"></i>
+      <input id="palette-input" type="text" placeholder="Type a command or search… (try: hire, projects, tgflow)" class="flex-1 bg-transparent outline-none text-sm text-ghost placeholder:text-fog/50 font-mono">
+      <span class="tag">ESC</span>
+    </div>
+    <div id="palette-list" class="p-2 max-h-80 overflow-y-auto chat-scroll"></div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="fixed bottom-6 right-6 z-[80] transform translate-y-24 opacity-0 pointer-events-none">
+  <div class="gcard border-phos/40 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3">
+    <div class="w-8 h-8 rounded-full bg-phos/15 border border-phos/40 flex items-center justify-center text-phos">
+      <i class="fa-solid fa-check text-sm"></i>
+    </div>
+    <div>
+      <p id="toast-title" class="text-sm font-semibold text-ghost">Copied!</p>
+      <p id="toast-desc" class="text-xs text-fog">Ready to paste.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<header id="nav" class="fixed top-0 left-0 right-0 z-50 border-b border-transparent">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-panel border border-phos/40 flex items-center justify-center shadow-[0_0_18px_rgba(0,255,156,.25)]">
+        <span class="font-mono font-extrabold text-phos">~/MD</span>
+      </div>
+      <div class="leading-tight">
+        <div class="font-mono font-bold text-ghost flex items-center gap-2 text-[15px]">
+          mr_dulal<span class="text-phos">@</span>dev
+          <i class="fa-solid fa-circle-check text-sig text-[11px]" title="Verified Senior Developer"></i>
+        </div>
+        <div class="font-mono text-[10px] text-fog flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-phos animate-pulse inline-block"></span>senior-developer • online
+        </div>
+      </div>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-8 text-[13px] font-mono text-fog">
+      <a href="#about" class="nav-link hover:text-phos transition-colors">./about</a>
+      <a href="#skills" class="nav-link hover:text-phos transition-colors">./stack</a>
+      <a href="#projects" class="nav-link hover:text-phos transition-colors">./projects</a>
+      <a href="#architecture" class="nav-link hover:text-phos transition-colors">./systems</a>
+      <a href="#services" class="nav-link hover:text-phos transition-colors">./services</a>
+      <a href="#contact" class="nav-link hover:text-phos transition-colors">./contact</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button onclick="togglePalette()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-panel border border-line text-fog hover:text-phos hover:border-phos/40 transition-all font-mono text-xs" title="Command Palette (Ctrl+K)">
+        <i class="fa-solid fa-terminal"></i><span class="hidden md:inline">⌘K</span>
+      </button>
+      <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="hidden sm:flex p-2.5 rounded-xl bg-panel border border-line text-fog hover:text-ghost hover:border-sig/50 transition-all" title="GitHub">
+        <i class="fa-brands fa-github text-lg"></i>
+      </a>
+      <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="hidden md:flex px-4 py-2.5 rounded-xl btn-primary text-white font-semibold text-sm font-mono items-center gap-2">
+        <i class="fa-brands fa-telegram"></i>@MrDulal
+      </a>
+      <button id="mobile-menu-btn" class="lg:hidden p-2.5 rounded-xl bg-panel border border-line text-ghost">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden lg:hidden border-t border-line bg-void/95 backdrop-blur px-4 pt-3 pb-6 space-y-1 font-mono text-sm">
+    <a href="#about" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./about</a>
+    <a href="#skills" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./stack</a>
+    <a href="#projects" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./projects</a>
+    <a href="#architecture" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./systems</a>
+    <a href="#services" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./services</a>
+    <a href="#contact" class="mobile-link block px-3 py-2.5 rounded-lg text-fog hover:bg-panel hover:text-phos">./contact</a>
+    <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="block mt-2 px-3 py-3 rounded-xl btn-primary text-center text-white font-semibold text-sm"><i class="fa-brands fa-telegram mr-2"></i>Message @MrDulal</a>
+  </div>
+</header>
+
+<main id="top" class="flex-grow relative z-10">
+
+<!-- ============ HERO ============ -->
+<section id="about" class="pt-32 md:pt-40 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen flex items-center">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+
+    <!-- LEFT -->
+    <div class="lg:col-span-7 space-y-7">
+      <div class="reveal inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-phos/5 border border-phos/30 font-mono text-[11px] text-phos tracking-widest">
+        <span class="w-2 h-2 rounded-full bg-phos animate-ping"></span>AVAILABLE_FOR_WORK: true
+      </div>
+
+      <div class="reveal">
+        <p class="font-mono text-fog text-sm mb-3">$ whoami</p>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-mono font-extrabold tracking-tight leading-[1.05] text-ghost">
+          <span class="text-phos">&gt;</span> Mr <span class="text-transparent bg-clip-text bg-gradient-to-r from-sig via-phos to-amber glow-text">Dulal</span><span class="text-phos">_</span>
+        </h1>
+      </div>
+
+      <div class="reveal text-lg sm:text-xl font-mono text-fog flex flex-wrap items-center gap-x-2 min-h-[2rem]">
+        <span class="text-phos">$</span><span>deploy</span>
+        <span id="typewriter" class="text-phos font-semibold glow-green"></span><span class="tw-caret"></span>
+      </div>
+
+      <p class="reveal text-fog/90 text-base sm:text-lg leading-relaxed max-w-2xl border-l-2 border-line pl-5">
+        Senior developer engineering <strong class="text-ghost">high-performance Python &amp; JavaScript systems</strong>, advanced
+        <strong class="text-ghost">Telegram automation</strong>, custom <strong class="text-ghost">Telegram Web Apps (Mini Apps)</strong>, and
+        full-scale autonomous platforms like <span class="font-mono text-sig">TgFlow</span> and <span class="font-mono text-phos">Agent</span>.
+        Complex ideas in → fast, reliable products out.
+      </p>
+
+      <div class="reveal flex flex-wrap items-center gap-4 pt-1">
+        <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-xl btn-primary text-white font-semibold text-sm font-mono flex items-center gap-2.5">
+          <i class="fa-brands fa-telegram text-lg"></i>t.me/MrDulal
+        </a>
+        <a href="#projects" class="px-6 py-3.5 rounded-xl btn-ghost font-mono text-sm font-semibold flex items-center gap-2.5">
+          <i class="fa-solid fa-layer-group"></i>./projects --all
+        </a>
+        <button onclick="copyText('dulaldeveloper@gmail.com', 'Email copied to clipboard')" class="px-4 py-3.5 rounded-xl gcard text-fog hover:text-ghost font-mono text-xs flex items-center gap-2 transition-all" title="Copy email">
+          <i class="fa-regular fa-envelope text-phos"></i><span class="hidden sm:inline">dulaldeveloper@gmail.com</span><i class="fa-regular fa-copy opacity-60"></i>
+        </button>
+      </div>
+
+      <!-- LIVE STATS -->
+      <div class="reveal pt-7 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-line">
+        <div>
+          <div class="stat-num text-2xl sm:text-3xl font-extrabold text-phos" data-count="99" data-suffix=".98%">0</div>
+          <div class="text-[11px] font-mono text-fog mt-1">uptime_percent</div>
+        </div>
+        <div>
+          <div class="stat-num text-2xl sm:text-3xl font-extrabold text-sig" data-count="24" data-suffix="/7">0</div>
+          <div class="text-[11px] font-mono text-fog mt-1">bots_online</div>
+        </div>
+        <div>
+          <div class="stat-num text-2xl sm:text-3xl font-extrabold text-amber" data-count="100" data-suffix="%">0</div>
+          <div class="text-[11px] font-mono text-fog mt-1">custom_built</div>
+        </div>
+        <div>
+          <div class="stat-num text-2xl sm:text-3xl font-extrabold text-ghost" data-count="3" data-prefix="<" data-suffix="ms">0</div>
+          <div class="text-[11px] font-mono text-fog mt-1">avg_response</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: terminal + bot simulator -->
+    <div class="lg:col-span-5 space-y-5">
+      <!-- code window -->
+      <div class="reveal term tilt">
+        <div class="term-head tilt-inner">
+          <span class="term-dot bg-[#ff5f57]"></span><span class="term-dot bg-[#febc2e]"></span><span class="term-dot bg-[#28c840]"></span>
+          <span class="ml-2 font-mono text-[11px] text-fog">agent_core.py — python3.12</span>
+          <span class="ml-auto font-mono text-[10px] text-phos border border-phos/30 rounded px-1.5 py-0.5">LIVE</span>
+        </div>
+        <pre class="term-body p-5 font-mono text-[12.5px] leading-relaxed overflow-x-auto"><code><span class="tok-c"># Mr Dulal — autonomous agent core</span>
+<span class="tok-k">import</span> asyncio, telegram
+<span class="tok-k">from</span> tgflow <span class="tok-k">import</span> Marketplace
+
+<span class="tok-k">class</span> <span class="tok-f">DulalAgent</span>(telegram.Bot):
+    stack = [<span class="tok-s">"Python"</span>, <span class="tok-s">"JS"</span>, <span class="tok-s">"TMA"</span>]
+    uptime  = <span class="tok-n">99.98</span>   <span class="tok-c"># percent</span>
+    latency = <span class="tok-n">2.7</span>     <span class="tok-c"># ms</span>
+
+    <span class="tok-k">async def</span> <span class="tok-f">handle_order</span>(self, order):
+        <span class="tok-k">await</span> order.verify()      <span class="tok-c"># webhook sync</span>
+        <span class="tok-k">await</span> order.deliver()     <span class="tok-c"># instant</span>
+        <span class="tok-k">return</span> <span class="tok-g">"✓ delivered"</span>
+
+agent = <span class="tok-f">DulalAgent</span>(<span class="tok-amber">mode</span>=<span class="tok-s">"AUTONOMOUS"</span>)
+<span class="tok-k">await</span> agent.run(<span class="tok-n">24</span>/<span class="tok-n">7</span>)  <span class="tok-c"># never sleeps</span></code></pre>
+      </div>
+
+      <!-- bot simulator -->
+      <div class="reveal gcard rounded-2xl overflow-hidden lift">
+        <div class="bg-panel/90 px-5 py-3.5 border-b border-line flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-sig to-phos flex items-center justify-center text-void">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-phos border-2 border-void absolute bottom-0 right-0"></span>
+            </div>
+            <div class="leading-tight">
+              <div class="text-[13px] font-bold text-ghost font-mono">dulal_assistant_bot</div>
+              <div class="text-[10px] font-mono text-phos">● online — interactive preview</div>
+            </div>
+          </div>
+          <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="text-[11px] font-mono text-sig hover:text-phos transition-colors">open real chat ↗</a>
+        </div>
+        <div id="bot-chat-box" class="p-4 h-60 overflow-y-auto chat-scroll space-y-3 font-mono text-[12px] bg-void/60"></div>
+        <div class="p-3.5 bg-panel/90 border-t border-line">
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            <button class="cmd-btn" data-cmd="/tgflow">/tgflow</button>
+            <button class="cmd-btn" data-cmd="/agent">/agent</button>
+            <button class="cmd-btn" data-cmd="/stack">/stack</button>
+            <button class="cmd-btn" data-cmd="/status">/status</button>
+            <button class="cmd-btn" data-cmd="/hire">/hire</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal absolute bottom-6 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-fog font-mono text-[10px] tracking-[.3em]">
+    SCROLL
+    <span class="w-px h-8 bg-gradient-to-b from-phos to-transparent animate-pulse"></span>
+  </div>
+</section>
+
+<!-- ============ TECH MARQUEE ============ -->
+<div class="border-y border-line bg-panel/40 py-4 overflow-hidden relative z-10">
+  <div class="marquee font-mono text-[13px] text-fog" id="tech-marquee"></div>
+</div>
+
+<!-- ============ SKILLS ============ -->
+<section id="skills" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <div class="reveal mb-14">
+    <span class="sec-label">~/core_arsenal</span>
+    <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">Tech Stack &amp; <span class="text-phos">Tools</span></h2>
+    <p class="text-fog mt-3 max-w-2xl">Backend logic × modern interfaces. Every system compiled from scratch, tuned for scale.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <!-- skill bars -->
+    <div class="reveal space-y-6">
+      <div class="font-mono text-xs text-fog mb-2">$ cat proficiency.log</div>
+      <div class="space-y-5" id="skill-bars"></div>
+    </div>
+
+    <!-- categories -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="reveal gcard rounded-2xl p-6 lift">
+        <div class="w-11 h-11 rounded-xl bg-sig/10 border border-sig/30 flex items-center justify-center text-sig text-lg mb-4"><i class="fa-brands fa-telegram"></i></div>
+        <h3 class="font-mono font-bold text-ghost mb-2">Telegram Ecosystem</h3>
+        <p class="text-xs text-fog mb-4 leading-relaxed">Bots, userbots, auto-marketplaces &amp; native Mini Apps — end to end.</p>
+        <div class="flex flex-wrap gap-1.5"><span class="tag">Bot API</span><span class="tag">Web Apps</span><span class="tag">Aiogram</span><span class="tag">Pyrogram</span><span class="tag">Telethon</span></div>
+      </div>
+      <div class="reveal gcard rounded-2xl p-6 lift">
+        <div class="w-11 h-11 rounded-xl bg-phos/10 border border-phos/30 flex items-center justify-center text-phos text-lg mb-4"><i class="fa-brands fa-python"></i></div>
+        <h3 class="font-mono font-bold text-ghost mb-2">Python &amp; Automation</h3>
+        <p class="text-xs text-fog mb-4 leading-relaxed">Async agents, CLI/GUI tools, API bridges, high-concurrency workflows.</p>
+        <div class="flex flex-wrap gap-1.5"><span class="tag">Python 3</span><span class="tag">Asyncio</span><span class="tag">Agents</span><span class="tag">REST</span><span class="tag">Webhooks</span></div>
+      </div>
+      <div class="reveal gcard rounded-2xl p-6 lift">
+        <div class="w-11 h-11 rounded-xl bg-amber/10 border border-amber/30 flex items-center justify-center text-amber text-lg mb-4"><i class="fa-brands fa-js"></i></div>
+        <h3 class="font-mono font-bold text-ghost mb-2">Web &amp; Custom UI</h3>
+        <p class="text-xs text-fog mb-4 leading-relaxed">Ultra-responsive sites, dashboards &amp; interactive web apps.</p>
+        <div class="flex flex-wrap gap-1.5"><span class="tag">JS ES6+</span><span class="tag">HTML5</span><span class="tag">Tailwind</span><span class="tag">Custom UX</span></div>
+      </div>
+      <div class="reveal gcard rounded-2xl p-6 lift">
+        <div class="w-11 h-11 rounded-xl bg-[#d2a8ff]/10 border border-[#d2a8ff]/30 flex items-center justify-center text-[#d2a8ff] text-lg mb-4"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <h3 class="font-mono font-bold text-ghost mb-2">Dev Tools &amp; Ops</h3>
+        <p class="text-xs text-fog mb-4 leading-relaxed">Payments, databases, deployment pipelines, custom utilities.</p>
+        <div class="flex flex-wrap gap-1.5"><span class="tag">Git</span><span class="tag">Payments</span><span class="tag">SQL/NoSQL</span><span class="tag">Linux VPS</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-line">
+  <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div>
+      <span class="sec-label">~/deployed_systems</span>
+      <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">Featured <span class="text-sig glow-text">Projects</span></h2>
+      <p class="text-fog mt-3 max-w-2xl">Flagship automation platforms, marketplaces &amp; web applications — running in production.</p>
+    </div>
+    <div class="flex flex-wrap gap-2 font-mono text-xs">
+      <button onclick="filterProjects('all', this)" class="filter-btn active px-4 py-2 rounded-xl border border-line text-fog hover:text-ghost">--all</button>
+      <button onclick="filterProjects('marketplace', this)" class="filter-btn px-4 py-2 rounded-xl border border-line text-fog hover:text-ghost">marketplace</button>
+      <button onclick="filterProjects('automation', this)" class="filter-btn px-4 py-2 rounded-xl border border-line text-fog hover:text-ghost">automation</button>
+      <button onclick="filterProjects('web', this)" class="filter-btn px-4 py-2 rounded-xl border border-line text-fog hover:text-ghost">web</button>
+    </div>
+  </div>
+
+  <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+    <!-- TgFlow -->
+    <div data-category="marketplace" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift tilt">
+      <div class="tilt-inner flex flex-col h-full">
+        <div class="flex items-center justify-between mb-5">
+          <span class="px-3 py-1 rounded-full bg-sig/10 border border-sig/30 text-sig text-[11px] font-mono">★ flagship</span>
+          <span class="text-[11px] font-mono text-phos"><i class="fa-solid fa-bolt mr-1"></i>automated</span>
+        </div>
+        <h3 class="font-mono text-xl font-extrabold text-ghost">TgFlow <span class="text-fog font-normal text-sm">— auto-marketplace</span></h3>
+        <p class="text-fog text-[13px] mt-3 leading-relaxed">Complete automated Telegram marketplace: instant digital delivery, order verification, user wallets &amp; real-time admin analytics — zero manual work.</p>
+        <ul class="mt-4 space-y-2 text-xs font-mono text-fog">
+          <li><i class="fa-solid fa-check text-sig mr-2"></i>24/7 auto checkout &amp; delivery</li>
+          <li><i class="fa-solid fa-check text-sig mr-2"></i>multi-role admin/seller panel</li>
+          <li><i class="fa-solid fa-check text-sig mr-2"></i>webhook &amp; payment sync</li>
+        </ul>
+        <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+          <div class="flex gap-1.5 flex-wrap"><span class="tag">Python</span><span class="tag">TG API</span><span class="tag">JS</span></div>
+          <button onclick="openProjectModal('TgFlow')" class="font-mono text-xs text-sig hover:text-phos transition-colors">inspect →</button>
+        </div>
+      </div>
+    </div>
+    <!-- Agent -->
+    <div data-category="automation" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift tilt">
+      <div class="tilt-inner flex flex-col h-full">
+        <div class="flex items-center justify-between mb-5">
+          <span class="px-3 py-1 rounded-full bg-phos/10 border border-phos/30 text-phos text-[11px] font-mono">★ autonomous</span>
+          <span class="text-[11px] font-mono text-sig"><i class="fa-solid fa-microchip mr-1"></i>smart engine</span>
+        </div>
+        <h3 class="font-mono text-xl font-extrabold text-ghost">Agent <span class="text-fog font-normal text-sm">— automation bot</span></h3>
+        <p class="text-fog text-[13px] mt-3 leading-relaxed">Intelligent agent for complex Telegram &amp; web operations: scheduled tasks, multi-channel monitoring, smart auto-responses, custom business logic.</p>
+        <ul class="mt-4 space-y-2 text-xs font-mono text-fog">
+          <li><i class="fa-solid fa-check text-phos mr-2"></i>event-driven task execution</li>
+          <li><i class="fa-solid fa-check text-phos mr-2"></i>custom rules &amp; smart filtering</li>
+          <li><i class="fa-solid fa-check text-phos mr-2"></i>high-speed async Python core</li>
+        </ul>
+        <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+          <div class="flex gap-1.5 flex-wrap"><span class="tag">Python</span><span class="tag">Asyncio</span><span class="tag">Bot API</span></div>
+          <button onclick="openProjectModal('Agent')" class="font-mono text-xs text-phos hover:text-sig transition-colors">inspect →</button>
+        </div>
+      </div>
+    </div>
+    <!-- TMA -->
+    <div data-category="web" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift tilt">
+      <div class="tilt-inner flex flex-col h-full">
+        <div class="flex items-center justify-between mb-5">
+          <span class="px-3 py-1 rounded-full bg-[#d2a8ff]/10 border border-[#d2a8ff]/30 text-[#d2a8ff] text-[11px] font-mono">mini app</span>
+          <span class="text-[11px] font-mono text-fog">web app</span>
+        </div>
+        <h3 class="font-mono text-xl font-extrabold text-ghost">Telegram <span class="text-fog font-normal text-sm">Web Apps</span></h3>
+        <p class="text-fog text-[13px] mt-3 leading-relaxed">Full-screen Mini Apps launched inside Telegram: native theme integration, auth validation, interactive dashboards, instant storefronts.</p>
+        <ul class="mt-4 space-y-2 text-xs font-mono text-fog">
+          <li><i class="fa-solid fa-check text-[#d2a8ff] mr-2"></i>native WebApp SDK integration</li>
+          <li><i class="fa-solid fa-check text-[#d2a8ff] mr-2"></i>bot-to-web data sync</li>
+          <li><i class="fa-solid fa-check text-[#d2a8ff] mr-2"></i>mobile-first custom UI/UX</li>
+        </ul>
+        <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+          <div class="flex gap-1.5 flex-wrap"><span class="tag">JS</span><span class="tag">HTML/CSS</span><span class="tag">TMA SDK</span></div>
+          <button onclick="openProjectModal('TMA')" class="font-mono text-xs text-[#d2a8ff] hover:text-phos transition-colors">inspect →</button>
+        </div>
+      </div>
+    </div>
+    <!-- custom bots -->
+    <div data-category="marketplace" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift">
+      <div class="flex items-center justify-between mb-5">
+        <span class="px-3 py-1 rounded-full bg-sky-400/10 border border-sky-400/30 text-sky-300 text-[11px] font-mono">custom bots</span>
+        <span class="text-[11px] font-mono text-fog">multi-purpose</span>
+      </div>
+      <h3 class="font-mono text-lg font-extrabold text-ghost">Bespoke Bot Systems</h3>
+      <p class="text-fog text-[13px] mt-3 leading-relaxed">Tailor-made bots: community management, subscription billing, support ticketing, crypto/payment alerts, group moderation.</p>
+      <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+        <div class="flex gap-1.5 flex-wrap"><span class="tag">Python</span><span class="tag">Webhooks</span></div>
+        <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-sky-300 hover:text-phos transition-colors">request demo →</a>
+      </div>
+    </div>
+    <!-- tools -->
+    <div data-category="automation" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift">
+      <div class="flex items-center justify-between mb-5">
+        <span class="px-3 py-1 rounded-full bg-amber/10 border border-amber/30 text-amber text-[11px] font-mono">custom tools</span>
+        <span class="text-[11px] font-mono text-fog">scripts &amp; APIs</span>
+      </div>
+      <h3 class="font-mono text-lg font-extrabold text-ghost">Workflow Automation Suite</h3>
+      <p class="text-fog text-[13px] mt-3 leading-relaxed">Python/JS tools that kill repetitive work: API bridges, data parsers, bulk utilities, real-time notification pipelines.</p>
+      <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+        <div class="flex gap-1.5 flex-wrap"><span class="tag">Python</span><span class="tag">REST</span></div>
+        <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-amber hover:text-phos transition-colors">github →</a>
+      </div>
+    </div>
+    <!-- websites -->
+    <div data-category="web" class="project-card reveal gcard rounded-3xl p-6 flex flex-col lift">
+      <div class="flex items-center justify-between mb-5">
+        <span class="px-3 py-1 rounded-full bg-pink-400/10 border border-pink-400/30 text-pink-300 text-[11px] font-mono">web &amp; design</span>
+        <span class="text-[11px] font-mono text-fog">full-stack</span>
+      </div>
+      <h3 class="font-mono text-lg font-extrabold text-ghost">Sites &amp; Admin Portals</h3>
+      <p class="text-fog text-[13px] mt-3 leading-relaxed">High-converting landing pages, SaaS dashboards &amp; portals — clean HTML5, modern CSS, interactive JS. Fast on every device.</p>
+      <div class="mt-auto pt-5 border-t border-line flex items-center justify-between">
+        <div class="flex gap-1.5 flex-wrap"><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">JS</span></div>
+        <a href="#contact" class="font-mono text-xs text-pink-300 hover:text-phos transition-colors">start →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE / SYSTEMS ============ -->
+<section id="architecture" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-line">
+  <div class="reveal text-center max-w-3xl mx-auto mb-14">
+    <span class="sec-label justify-center" style="justify-content:center">~/system_architecture</span>
+    <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">How <span class="text-phos glow-green">TgFlow</span> Actually Runs</h2>
+    <p class="text-fog mt-3">Live dataflow of the automated marketplace engine. Hover any node.</p>
+  </div>
+
+  <div class="reveal gcard rounded-3xl p-6 sm:p-10 overflow-x-auto">
+    <div class="min-w-[760px]">
+      <!-- flow row 1 -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-44">
+          <i class="fa-brands fa-telegram text-sig text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">User</div>
+          <div class="font-mono text-[10px] text-fog mt-1">/start · /buy</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0"><line x1="0" y1="12" x2="82" y2="12" stroke="#00ff9c" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#00ff9c"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-48 border-sig/40">
+          <i class="fa-solid fa-robot text-sig text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">TgFlow Bot</div>
+          <div class="font-mono text-[10px] text-fog mt-1">Aiogram · async</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0"><line x1="0" y1="12" x2="82" y2="12" stroke="#2aabee" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#2aabee"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-48">
+          <i class="fa-solid fa-gears text-amber text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">Agent Core</div>
+          <div class="font-mono text-[10px] text-fog mt-1">rules · triggers</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0"><line x1="0" y1="12" x2="82" y2="12" stroke="#00ff9c" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#00ff9c"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-44 border-phos/40">
+          <i class="fa-solid fa-database text-phos text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">Database</div>
+          <div class="font-mono text-[10px] text-fog mt-1">orders · wallets</div>
+        </div>
+      </div>
+      <!-- connector down -->
+      <div class="flex justify-end pr-24 my-1"><svg width="24" height="44"><line x1="12" y1="0" x2="12" y2="36" stroke="#2aabee" stroke-width="1.5" class="pulse-line"/><path d="M7 36 L12 44 L17 36 Z" fill="#2aabee"/></svg></div>
+      <!-- flow row 2 (reversed) -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-44">
+          <i class="fa-solid fa-bolt text-amber text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">Instant Delivery</div>
+          <div class="font-mono text-[10px] text-fog mt-1">auto-send product</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0" style="transform:scaleX(-1)"><line x1="0" y1="12" x2="82" y2="12" stroke="#00ff9c" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#00ff9c"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-48">
+          <i class="fa-solid fa-credit-card text-sig text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">Payment Gateway</div>
+          <div class="font-mono text-[10px] text-fog mt-1">webhook verify</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0" style="transform:scaleX(-1)"><line x1="0" y1="12" x2="82" y2="12" stroke="#2aabee" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#2aabee"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-48 border-phos/40">
+          <i class="fa-solid fa-chart-line text-phos text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">Admin Analytics</div>
+          <div class="font-mono text-[10px] text-fog mt-1">sales · broadcast</div>
+        </div>
+        <svg width="90" height="24" class="shrink-0" style="transform:scaleX(-1)"><line x1="0" y1="12" x2="82" y2="12" stroke="#00ff9c" stroke-width="1.5" class="pulse-line"/><path d="M82 7 L90 12 L82 17 Z" fill="#00ff9c"/></svg>
+        <div class="flow-node gcard rounded-2xl px-5 py-4 text-center w-44">
+          <i class="fa-solid fa-bell text-amber text-2xl mb-2"></i>
+          <div class="font-mono text-xs font-bold text-ghost">User Notified</div>
+          <div class="font-mono text-[10px] text-fog mt-1">✓ order complete</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 pt-8 border-t border-line font-mono">
+      <div class="text-center"><div class="stat-num text-xl font-bold text-phos" data-count="0" data-suffix="ms">0</div><div class="text-[10px] text-fog mt-1">manual_steps</div></div>
+      <div class="text-center"><div class="stat-num text-xl font-bold text-sig" data-count="24" data-suffix="/7">0</div><div class="text-[10px] text-fog mt-1">uptime</div></div>
+      <div class="text-center"><div class="stat-num text-xl font-bold text-amber" data-count="3" data-suffix=" roles">0</div><div class="text-[10px] text-fog mt-1">access_levels</div></div>
+      <div class="text-center"><div class="stat-num text-xl font-bold text-ghost" data-count="100" data-suffix="%">0</div><div class="text-[10px] text-fog mt-1">automated</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto border-t border-line">
+  <div class="reveal mb-12">
+    <span class="sec-label">~/execution_log</span>
+    <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">How We <span class="text-amber">Ship</span></h2>
+  </div>
+  <div class="space-y-10">
+    <div class="reveal tl-item">
+      <span class="tl-node"></span>
+      <div class="font-mono text-xs text-phos mb-1">PHASE_01 // discovery</div>
+      <h3 class="font-mono font-bold text-ghost text-lg">Deep-dive spec</h3>
+      <p class="text-fog text-sm mt-1 max-w-xl">We map every workflow, edge case &amp; integration before a single line ships. No guesswork.</p>
+    </div>
+    <div class="reveal tl-item">
+      <span class="tl-node" style="border-color:#2aabee; box-shadow:0 0 12px rgba(42,171,238,.6)"></span>
+      <div class="font-mono text-xs text-sig mb-1">PHASE_02 // build</div>
+      <h3 class="font-mono font-bold text-ghost text-lg">Custom architecture</h3>
+      <p class="text-fog text-sm mt-1 max-w-xl">Async Python cores, clean JS frontends, Telegram-native UX. Built from zero — never templates.</p>
+    </div>
+    <div class="reveal tl-item">
+      <span class="tl-node" style="border-color:#ffb454; box-shadow:0 0 12px rgba(255,180,84,.6)"></span>
+      <div class="font-mono text-xs text-amber mb-1">PHASE_03 // deploy</div>
+      <h3 class="font-mono font-bold text-ghost text-lg">Hardened launch</h3>
+      <p class="text-fog text-sm mt-1 max-w-xl">VPS deployment, monitoring, payment sync, failover logic. Your system runs 24/7 without babysitting.</p>
+    </div>
+    <div class="reveal tl-item">
+      <span class="tl-node"></span>
+      <div class="font-mono text-xs text-phos mb-1">PHASE_04 // scale</div>
+      <h3 class="font-mono font-bold text-ghost text-lg">Long-term support</h3>
+      <p class="text-fog text-sm mt-1 max-w-xl">Direct line to me on Telegram. Updates, new features &amp; scaling — whenever you need.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section id="services" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-line">
+  <div class="reveal text-center max-w-3xl mx-auto mb-14">
+    <span class="sec-label" style="justify-content:center">~/services --list</span>
+    <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">Custom Development <span class="text-phos glow-green">Services</span></h2>
+    <p class="text-fog mt-3">Every project built from the ground up. Pick a module or request something entirely new.</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="reveal gcard rounded-3xl p-8 lift relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-sig/10 blur-2xl rounded-full"></div>
+      <div class="w-11 h-11 rounded-xl bg-sig/10 border border-sig/30 text-sig flex items-center justify-center font-mono font-bold mb-5">01</div>
+      <h3 class="font-mono text-lg font-bold text-ghost">Telegram Bots &amp; Marketplaces</h3>
+      <p class="text-fog text-sm mt-3 leading-relaxed">Complete automated stores, TgFlow-style workflows, payment integration, member management, custom commands.</p>
+      <div class="mt-5 pt-4 border-t border-line font-mono text-[11px] text-fog space-y-1.5">
+        <div><span class="text-phos">✓</span> auto-delivery engine</div>
+        <div><span class="text-phos">✓</span> wallet &amp; top-up system</div>
+        <div><span class="text-phos">✓</span> admin analytics panel</div>
+      </div>
+    </div>
+    <div class="reveal gcard rounded-3xl p-8 lift relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-phos/10 blur-2xl rounded-full"></div>
+      <div class="w-11 h-11 rounded-xl bg-phos/10 border border-phos/30 text-phos flex items-center justify-center font-mono font-bold mb-5">02</div>
+      <h3 class="font-mono text-lg font-bold text-ghost">Web Apps &amp; Websites</h3>
+      <p class="text-fog text-sm mt-3 leading-relaxed">Custom-designed websites &amp; interactive Telegram Mini Apps (TMA) — sleek on every device, wired to your backend.</p>
+      <div class="mt-5 pt-4 border-t border-line font-mono text-[11px] text-fog space-y-1.5">
+        <div><span class="text-phos">✓</span> native TMA SDK auth</div>
+        <div><span class="text-phos">✓</span> mobile-first UI/UX</div>
+        <div><span class="text-phos">✓</span> dark-mode adaptive</div>
+      </div>
+    </div>
+    <div class="reveal gcard rounded-3xl p-8 lift relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-amber/10 blur-2xl rounded-full"></div>
+      <div class="w-11 h-11 rounded-xl bg-amber/10 border border-amber/30 text-amber flex items-center justify-center font-mono font-bold mb-5">03</div>
+      <h3 class="font-mono text-lg font-bold text-ghost">Python Tools &amp; Agents</h3>
+      <p class="text-fog text-sm mt-3 leading-relaxed">Autonomous Agent scripts, custom software, API integrations &amp; task automation that saves hours daily.</p>
+      <div class="mt-5 pt-4 border-t border-line font-mono text-[11px] text-fog space-y-1.5">
+        <div><span class="text-phos">✓</span> 24/7 async execution</div>
+        <div><span class="text-phos">✓</span> smart rules &amp; filters</div>
+        <div><span class="text-phos">✓</span> external API bridges</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-line">
+  <div class="reveal mb-12 text-center">
+    <span class="sec-label" style="justify-content:center">~/faq --verbose</span>
+    <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">Common <span class="text-sig glow-text">Questions</span></h2>
+  </div>
+  <div class="space-y-4" id="faq-list">
+    <div class="faq-item reveal gcard rounded-2xl overflow-hidden">
+      <button class="faq-toggle w-full flex items-center justify-between px-6 py-5 text-left">
+        <span class="font-mono font-bold text-ghost text-sm">How fast can you start &amp; deliver?</span>
+        <i class="fa-solid fa-chevron-down faq-chevron text-phos text-sm"></i>
+      </button>
+      <div class="faq-body px-6"><p class="text-fog text-sm pb-5 leading-relaxed">Message me on Telegram with your idea — I usually reply within hours. Simple bots ship in days; full marketplaces like TgFlow take 1–3 weeks depending on feature depth.</p></div>
+    </div>
+    <div class="faq-item reveal gcard rounded-2xl overflow-hidden">
+      <button class="faq-toggle w-full flex items-center justify-between px-6 py-5 text-left">
+        <span class="font-mono font-bold text-ghost text-sm">Do you build everything custom?</span>
+        <i class="fa-solid fa-chevron-down faq-chevron text-phos text-sm"></i>
+      </button>
+      <div class="faq-body px-6"><p class="text-fog text-sm pb-5 leading-relaxed">Yes — 100% custom architecture. No templates, no bloated frameworks. Every bot, agent and web app is engineered for your exact workflow.</p></div>
+    </div>
+    <div class="faq-item reveal gcard rounded-2xl overflow-hidden">
+      <button class="faq-toggle w-full flex items-center justify-between px-6 py-5 text-left">
+        <span class="font-mono font-bold text-ghost text-sm">What do you need from me to start?</span>
+        <i class="fa-solid fa-chevron-down faq-chevron text-phos text-sm"></i>
+      </button>
+      <div class="faq-body px-6"><p class="text-fog text-sm pb-5 leading-relaxed">Just a clear description of what you want built. Use the project builder below or message <span class="font-mono text-phos">@MrDulal</span> directly — we'll scope it together.</p></div>
+    </div>
+    <div class="faq-item reveal gcard rounded-2xl overflow-hidden">
+      <button class="faq-toggle w-full flex items-center justify-between px-6 py-5 text-left">
+        <span class="font-mono font-bold text-ghost text-sm">Can you maintain or upgrade an existing bot?</span>
+        <i class="fa-solid fa-chevron-down faq-chevron text-phos text-sm"></i>
+      </button>
+      <div class="faq-body px-6"><p class="text-fog text-sm pb-5 leading-relaxed">Absolutely. I audit existing Python/JS systems, fix bottlenecks, add features, and migrate legacy bots to modern async architecture.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-line">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+    <div class="lg:col-span-5 space-y-6">
+      <div class="reveal">
+        <span class="sec-label">~/initiate_contact</span>
+        <h2 class="font-mono text-3xl sm:text-4xl font-extrabold text-ghost mt-4">Let's Build Your <span class="text-phos glow-green">Next System</span></h2>
+        <p class="text-fog mt-3">Telegram bot? Auto-marketplace? Custom tool? Website? Fastest response is always on Telegram.</p>
+      </div>
+
+      <div class="reveal space-y-4">
+        <div class="gcard rounded-2xl p-4 flex items-center justify-between border-sig/30 lift">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-sig/10 text-sig flex items-center justify-center text-xl"><i class="fa-brands fa-telegram"></i></div>
+            <div>
+              <div class="text-[10px] font-mono text-fog">telegram · fastest</div>
+              <div class="font-mono font-bold text-ghost text-sm">@MrDulal</div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="copyText('@MrDulal', 'Telegram username copied')" class="p-2.5 rounded-xl bg-panel border border-line text-fog hover:text-phos transition-all"><i class="fa-regular fa-copy"></i></button>
+            <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2.5 rounded-xl btn-primary text-white text-xs font-mono">msg →</a>
+          </div>
+        </div>
+        <div class="gcard rounded-2xl p-4 flex items-center justify-between lift">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-phos/10 text-phos flex items-center justify-center text-lg shrink-0"><i class="fa-regular fa-envelope"></i></div>
+            <div class="min-w-0">
+              <div class="text-[10px] font-mono text-fog">email</div>
+              <div class="font-mono font-bold text-ghost text-xs sm:text-sm truncate">dulaldeveloper@gmail.com</div>
+            </div>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button onclick="copyText('dulaldeveloper@gmail.com', 'Email address copied')" class="p-2.5 rounded-xl bg-panel border border-line text-fog hover:text-phos transition-all"><i class="fa-regular fa-copy"></i></button>
+            <a href="mailto:dulaldeveloper@gmail.com" class="px-3.5 py-2.5 rounded-xl bg-panel border border-line text-ghost text-xs font-mono hover:border-phos/40 transition-all">mail →</a>
+          </div>
+        </div>
+        <div class="gcard rounded-2xl p-4 flex items-center justify-between lift">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-panel text-ghost flex items-center justify-center text-xl"><i class="fa-brands fa-github"></i></div>
+            <div>
+              <div class="text-[10px] font-mono text-fog">github</div>
+              <div class="font-mono font-bold text-ghost text-xs sm:text-sm">sadinhossain139-max</div>
+            </div>
+          </div>
+          <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2.5 rounded-xl bg-panel border border-line text-ghost text-xs font-mono hover:border-phos/40 transition-all">visit →</a>
+        </div>
+      </div>
+
+      <div class="reveal term">
+        <div class="term-head"><span class="term-dot bg-[#ff5f57]"></span><span class="term-dot bg-[#febc2e]"></span><span class="term-dot bg-[#28c840]"></span><span class="ml-2 font-mono text-[11px] text-fog">response_sla.sh</span></div>
+        <div class="p-4 font-mono text-[12px] space-y-1.5">
+          <div><span class="text-fog">$</span> <span class="text-phos">./check_response_time --telegram</span></div>
+          <div class="text-fog">→ avg first reply: <span class="text-phos">&lt; 2 hours</span></div>
+          <div class="text-fog">→ status: <span class="text-phos">● accepting new projects</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- inquiry builder -->
+    <div class="lg:col-span-7 reveal">
+      <div class="gcard rounded-3xl p-6 sm:p-8">
+        <h3 class="font-mono text-lg font-bold text-ghost mb-1 flex items-center gap-2"><i class="fa-solid fa-paper-plane text-phos"></i>project_brief.builder</h3>
+        <p class="text-xs text-fog mb-6 font-mono">fill → generates a message → opens Telegram or your mail client</p>
+        <form onsubmit="handleInquirySubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-mono text-[10px] text-fog mb-1.5 tracking-widest">YOUR_NAME</label>
+              <input type="text" id="client-name" required placeholder="e.g. Alex (@alex_dev)" class="w-full px-4 py-3 rounded-xl bg-void border border-line text-ghost text-sm font-mono focus:outline-none focus:border-phos/60 transition-colors">
+            </div>
+            <div>
+              <label class="block font-mono text-[10px] text-fog mb-1.5 tracking-widest">PROJECT_TYPE</label>
+              <select id="project-type" class="w-full px-4 py-3 rounded-xl bg-void border border-line text-ghost text-sm font-mono focus:outline-none focus:border-phos/60 transition-colors">
+                <option>Telegram Bot / Automation</option>
+                <option>Marketplace System (like TgFlow)</option>
+                <option>Autonomous Agent / Python Tool</option>
+                <option>Telegram Web App (Mini App)</option>
+                <option>Custom Website &amp; UI Design</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-mono text-[10px] text-fog mb-1.5 tracking-widest">PROJECT_DETAILS</label>
+            <textarea id="project-details" rows="4" required placeholder="Describe the features, bot workflows, or design you want…" class="w-full px-4 py-3 rounded-xl bg-void border border-line text-ghost text-sm font-mono focus:outline-none focus:border-phos/60 transition-colors"></textarea>
+          </div>
+          <div class="flex flex-wrap gap-3 pt-1">
+            <button type="submit" class="flex-1 py-3.5 px-6 rounded-xl btn-primary text-white font-mono font-semibold text-sm flex items-center justify-center gap-2">
+              <i class="fa-brands fa-telegram text-lg"></i>send via telegram
+            </button>
+            <button type="button" onclick="sendViaEmail()" class="py-3.5 px-5 rounded-xl gcard text-fog hover:text-phos font-mono text-sm border border-line flex items-center gap-2 transition-all">
+              <i class="fa-regular fa-envelope"></i>via email
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ MODAL ============ -->
+<div id="project-modal" class="fixed inset-0 z-[85] hidden items-center justify-center p-4 bg-void/85 backdrop-blur-md">
+  <div class="gcard rounded-3xl max-w-lg w-full p-6 sm:p-8 relative">
+    <button onclick="closeProjectModal()" class="absolute top-5 right-5 w-9 h-9 rounded-xl bg-panel hover:bg-line text-fog flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
+    <div id="modal-badge" class="inline-block px-3 py-1 rounded-full bg-phos/10 border border-phos/30 text-phos text-[11px] font-mono mb-3">system</div>
+    <h3 id="modal-title" class="font-mono text-2xl font-extrabold text-ghost">—</h3>
+    <p id="modal-desc" class="text-fog text-sm mt-3 leading-relaxed"></p>
+    <div class="mt-5 pt-4 border-t border-line">
+      <div class="font-mono text-[10px] text-fog mb-2 tracking-widest">KEY_CAPABILITIES</div>
+      <ul id="modal-features" class="space-y-2 text-xs font-mono text-phos"></ul>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 rounded-xl btn-primary text-center text-white font-mono font-semibold text-sm"><i class="fa-brands fa-telegram mr-1"></i>discuss</a>
+      <button onclick="closeProjectModal()" class="px-5 py-3 rounded-xl bg-panel text-fog font-mono text-sm border border-line hover:text-ghost transition-colors">close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-line py-8 px-4 sm:px-6 lg:px-8 relative z-10 bg-void/70">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-fog">
+    <div class="flex items-center gap-2">
+      <span class="text-phos">~/</span><span class="text-ghost font-bold">mr_dulal</span>
+      <span>© 2026 · compiled with <span class="text-phos">&lt;3</span> in the terminal</span>
+    </div>
+    <div class="flex items-center gap-5">
+      <a href="https://t.me/MrDulal" target="_blank" rel="noopener noreferrer" class="hover:text-phos transition-colors">telegram</a>
+      <a href="mailto:dulaldeveloper@gmail.com" class="hover:text-phos transition-colors">email</a>
+      <a href="https://github.com/sadinhossain139-max/" target="_blank" rel="noopener noreferrer" class="hover:text-phos transition-colors">github</a>
+      <span id="uptime-ticker" class="text-phos/80"></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================
+   TERMINAL OVERDRIVE — runtime
+===================================================== */
+
+// ---------- boot sequence ----------
+const bootLines = [
+  ['dim','[ OK ] mounting /dev/portfolio ...'],
+  ['blue','[ OK ] loading telegram_api.module v6.5'],
+  ['dim','[ OK ] compiling tgflow.engine ... done'],
+  ['blue','[ OK ] spawning agent.core (pid 139) ...'],
+  ['dim','[ OK ] payment.webhooks → synced'],
+  ['blue','[ OK ] mini_apps.runtime → ready'],
+  ['','<span class="text-phos">[ ✓ ] ACCESS GRANTED — welcome, visitor</span>'],
+];
+const bootLog = document.getElementById('boot-log');
+let bl = 0;
+function bootStep(){
+  if(bl >= bootLines.length){ setTimeout(()=>document.getElementById('boot').classList.add('done'), 500); return; }
+  const [cls, txt] = bootLines[bl];
+  const div = document.createElement('div');
+  if(cls) div.className = cls;
+  div.innerHTML = txt;
+  bootLog.appendChild(div);
+  bl++;
+  setTimeout(bootStep, 260 + Math.random()*220);
+}
+bootStep();
+
+// ---------- custom cursor ----------
+const dot = document.getElementById('cursor-dot'), ring = document.getElementById('cursor-ring');
+let mx=innerWidth/2, my=innerHeight/2, rx=mx, ry=my;
+addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+(function ringLoop(){ rx+=(mx-rx)*.16; ry+=(my-ry)*.16; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(ringLoop); })();
+document.querySelectorAll('a,button,input,textarea,select,.flow-node,.cmd-btn').forEach(el=>{
+  el.addEventListener('mouseenter', ()=>ring.classList.add('hovering'));
+  el.addEventListener('mouseleave', ()=>ring.classList.remove('hovering'));
+});
+
+// ---------- matrix rain ----------
+const cvs = document.getElementById('matrix-canvas'), ctx = cvs.getContext('2d');
+let cols, drops;
+const glyphs = 'アイウエオ01<>/{}#$%&*+-=;:\\|';
+function sizeCanvas(){
+  cvs.width = innerWidth; cvs.height = innerHeight;
+  cols = Math.floor(cvs.width/16);
+  drops = Array(cols).fill(0).map(()=>Math.random()*cvs.height/16);
+}
+sizeCanvas(); addEventListener('resize', sizeCanvas);
+setInterval(()=>{
+  ctx.fillStyle = 'rgba(5,6,10,.12)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.font = '13px "JetBrains Mono", monospace';
+  for(let i=0;i<cols;i++){
+    ctx.fillStyle = Math.random()>.975 ? '#00ff9c' : 'rgba(42,171,238,.55)';
+    ctx.fillText(glyphs[Math.floor(Math.random()*glyphs.length)], i*16, drops[i]*16);
+    drops[i] = (drops[i]*16 > cvs.height && Math.random()>.975) ? 0 : drops[i]+1;
+  }
+}, 66);
+
+// ---------- nav / progress / mobile menu ----------
+const nav = document.getElementById('nav'), prog = document.getElementById('scroll-progress');
+addEventListener('scroll', ()=>{
+  nav.classList.toggle('scrolled', scrollY > 40);
+  const h = document.documentElement.scrollHeight - innerHeight;
+  prog.style.width = (scrollY/h*100) + '%';
+});
+document.getElementById('mobile-menu-btn').addEventListener('click', ()=>document.getElementById('mobile-menu').classList.toggle('hidden'));
+document.querySelectorAll('.mobile-link').forEach(l=>l.addEventListener('click', ()=>document.getElementById('mobile-menu').classList.add('hidden')));
+
+// ---------- typewriter ----------
+const roles = ['telegram_bots --production','tgflow_marketplace --auto','agent --autonomous','mini_apps --native','python_tools --custom','websites --responsive'];
+let ri=0, ci=0, del=false;
+const tw = document.getElementById('typewriter');
+(function type(){
+  const w = roles[ri];
+  tw.textContent = w.substring(0, ci);
+  let s = del? 30 : 65;
+  if(!del && ci===w.length){ s=1600; del=true; }
+  else if(del && ci===0){ del=false; ri=(ri+1)%roles.length; s=320; }
+  else ci += del? -1 : 1;
+  setTimeout(type, s);
+})();
+
+// ---------- tech marquee ----------
+const techs = ['PYTHON','JAVASCRIPT','TELEGRAM BOT API','AIogram','PYROGRAM','TELETHON','ASYNCIO','MINI APPS SDK','HTML5','CSS3','TAILWIND','REST APIS','WEBHOOKS','POSTGRESQL','REDIS','LINUX VPS','GIT','PAYMENT GATEWAYS'];
+const mq = document.getElementById('tech-marquee');
+const mqHTML = techs.map(t=>`<span class="px-6 py-1 whitespace-nowrap hover:text-phos transition-colors">${t} <span class="text-phos/50 ml-6">//</span></span>`).join('');
+mq.innerHTML = mqHTML + mqHTML;
+
+// ---------- skill bars ----------
+const skills = [
+  ['Python / Asyncio', 97], ['Telegram Bot API & MTProto', 96], ['JavaScript (ES6+)', 90],
+  ['Telegram Web Apps (TMA)', 93], ['HTML5 / CSS3 / Tailwind', 92], ['API Design / Webhooks', 94],
+];
+const sb = document.getElementById('skill-bars');
+skills.forEach(([name, pct])=>{
+  sb.insertAdjacentHTML('beforeend', `
+    <div>
+      <div class="flex justify-between font-mono text-xs mb-2">
+        <span class="text-ghost">${name}</span>
+        <span class="text-phos">${pct}%</span>
+      </div>
+      <div class="skill-track"><div class="skill-fill" data-pct="${pct}"></div></div>
+    </div>`);
+});
+
+// ---------- counters ----------
+const counters = document.querySelectorAll('.stat-num');
+const cObs = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(!en.isIntersecting) return;
+    const el = en.target, target = +el.dataset.count, pre = el.dataset.prefix||'', suf = el.dataset.suffix||'';
+    const dec = String(target).includes('.') ? 2 : 0;
+    let cur = 0; const step = target/60;
+    const t = setInterval(()=>{
+      cur += step;
+      if(cur >= target){ cur = target; clearInterval(t); }
+      el.textContent = pre + cur.toFixed(dec) + suf;
+    }, 24);
+    cObs.unobserve(el);
+  });
+},{threshold:.4});
+counters.forEach(c=>cObs.observe(c));
+
+// ---------- skill bar fill observer ----------
+const sObs = new IntersectionObserver(es=>es.forEach(en=>{
+  if(en.isIntersecting){ en.target.style.width = en.target.dataset.pct+'%'; sObs.unobserve(en.target); }
+}),{threshold:.4});
+document.querySelectorAll('.skill-fill').forEach(f=>sObs.observe(f));
+
+// ---------- reveals (GSAP) ----------
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.reveal').forEach(el=>{
+  gsap.to(el, { opacity:1, y:0, duration:.9, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 88%' } });
+});
+
+// ---------- tilt ----------
+document.querySelectorAll('.tilt').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
+    card.style.transform = `perspective(900px) rotateY(${x*7}deg) rotateX(${-y*7}deg)`;
+  });
+  card.addEventListener('mouseleave', ()=>card.style.transform='perspective(900px)');
+});
+
+// ---------- bot simulator ----------
+const chatBox = document.getElementById('bot-chat-box');
+const botResponses = {
+  '/tgflow': { t:'🛒 TgFlow Marketplace Engine', c:'text-sig', x:'Automated Telegram marketplace: instant delivery, wallets, order management & custom payment gateways. 0 manual steps.' },
+  '/agent':  { t:'🤖 Autonomous Agent System', c:'text-phos', x:'Runs 24/7 in async Python — automating workflows, smart monitoring, auto-replies & multi-channel task execution.' },
+  '/stack':  { t:'⚡ Core Stack', c:'text-[#d2a8ff]', x:'Python · JavaScript · HTML5/CSS3 · Telegram Bot API · Mini Apps SDK · Asyncio · Custom UI/UX.' },
+  '/status': { t:'📊 System Status', c:'text-[#ff7b72]', x:'● uptime 99.98% · latency 2.7ms · agents online: 12/12 · queue: empty · all systems nominal.' },
+  '/hire':   { t:'📬 Direct Contact', c:'text-amber', x:'Message @MrDulal on Telegram or email dulaldeveloper@gmail.com — fastest reply on Telegram.' },
+};
+function botBubble(title, cls, text){
+  const d = document.createElement('div');
+  d.className = 'flex items-start gap-2.5';
+  d.innerHTML = `<div class="w-6 h-6 rounded-full bg-phos/10 border border-phos/40 flex items-center justify-center text-phos text-[10px] shrink-0 mt-0.5"><i class="fa-solid fa-robot"></i></div>
+    <div class="bg-panel/90 text-fog rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] border border-line leading-relaxed">
+      <div class="font-bold ${cls} text-[11px] mb-1">${title}</div>
+      <div class="text-[11.5px] text-fog">${text}</div>
+    </div>`;
+  return d;
+}
+function seedChat(){
+  chatBox.innerHTML = '';
+  chatBox.appendChild(botBubble('dulal_assistant_bot','text-phos',
+    '👋 Welcome, visitor. Session authenticated. Click a command below to probe my capabilities:'));
+}
+seedChat();
+document.querySelectorAll('.cmd-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const cmd = btn.dataset.cmd;
+    const u = document.createElement('div');
+    u.className = 'flex justify-end';
+    u.innerHTML = `<div class="bg-sig/90 text-void rounded-2xl rounded-tr-sm px-3.5 py-2 text-[11px] font-mono font-semibold shadow">${cmd}</div>`;
+    chatBox.appendChild(u); chatBox.scrollTop = chatBox.scrollHeight;
+    const ty = document.createElement('div');
+    ty.className = 'flex items-start gap-2.5';
+    ty.innerHTML = `<div class="w-6 h-6 rounded-full bg-phos/10 border border-phos/40 flex items-center justify-center text-phos text-[10px] shrink-0 mt-0.5"><i class="fa-solid fa-robot"></i></div>
+      <div class="bg-panel/90 rounded-2xl rounded-tl-sm px-4 py-3 border border-line typing-dots"><span></span><span></span><span></span></div>`;
+    setTimeout(()=>{ chatBox.appendChild(ty); chatBox.scrollTop = chatBox.scrollHeight; }, 180);
+    setTimeout(()=>{
+      ty.remove();
+      const r = botResponses[cmd];
+      chatBox.appendChild(botBubble(r.t, r.c, r.x));
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, 850);
+  });
+});
+
+// ---------- project filter ----------
+function filterProjects(cat, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.project-card').forEach(c=>{
+    const show = cat==='all' || c.dataset.category===cat;
+    c.style.display = show ? '' : 'none';
+    if(show) gsap.fromTo(c, {opacity:0, y:24}, {opacity:1, y:0, duration:.55, ease:'power3.out'});
+  });
+}
+
+// ---------- modal ----------
+const projectData = {
+  TgFlow:{ b:'automated_marketplace', t:'TgFlow — Auto-Marketplace', d:'Engineered to automate digital goods & service marketplaces inside Telegram. Removes manual seller bottlenecks with automated inventory, instant delivery and secure wallet flows.',
+    f:['✓ instant automated product & license delivery','✓ user balance, top-up & order history','✓ real-time admin broadcast & sales analytics','✓ Python + Asyncio + Telegram Bot API'] },
+  Agent:{ b:'autonomous_python_engine', t:'Agent — Smart Automation', d:'High-speed autonomous agent for continuous background tasks, intelligent message routing, custom triggers and multi-platform API sync.',
+    f:['✓ 24/7 async background execution','✓ custom filtering, forwarding & smart replies','✓ seamless external REST API integration','✓ low-latency, high-reliability core'] },
+  TMA:{ b:'telegram_mini_app', t:'Custom Telegram Web Apps', d:'Full-featured web apps launching natively inside Telegram — rich HTML/CSS/JS interfaces with real-time bot authentication.',
+    f:['✓ native WebApp SDK integration','✓ responsive storefront & dashboard UI','✓ cryptographic initData verification','✓ smooth dark-mode adaptive animations'] },
+};
+function openProjectModal(k){
+  const d = projectData[k]; if(!d) return;
+  document.getElementById('modal-badge').textContent = d.b;
+  document.getElementById('modal-title').textContent = d.t;
+  document.getElementById('modal-desc').textContent = d.d;
+  document.getElementById('modal-features').innerHTML = d.f.map(x=>`<li>${x}</li>`).join('');
+  const m = document.getElementById('project-modal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeProjectModal(){
+  const m = document.getElementById('project-modal');
+  m.classList.add('hidden'); m.classList.remove('flex');
+}
+document.getElementById('project-modal').addEventListener('click', e=>{
+  if(e.target.id==='project-modal') closeProjectModal();
+});
+
+// ---------- FAQ ----------
+document.querySelectorAll('.faq-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+
+// ---------- toast / clipboard ----------
+function copyText(text, title){
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){ navigator.clipboard.writeText(text); }
+  document.body.removeChild(ta);
+  showToast(title, text);
+}
+let toastTimer;
+function showToast(title, desc){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-desc').textContent = desc;
+  t.classList.remove('translate-y-24','opacity-0');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.add('translate-y-24','opacity-0'), 3000);
+}
+
+// ---------- inquiry ----------
+function handleInquirySubmit(e){
+  e.preventDefault();
+  const name = document.getElementById('client-name').value.trim();
+  const type = document.getElementById('project-type').value;
+  const det  = document.getElementById('project-details').value.trim();
+  const msg = `Hi Mr Dulal! I'm ${name}.\nProject Type: ${type}\nDetails: ${det}`;
+  copyText(msg, 'Brief copied — opening Telegram…');
+  window.open('https://t.me/MrDulal?text='+encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
+}
+function sendViaEmail(){
+  const name = document.getElementById('client-name').value.trim() || 'Client';
+  const type = document.getElementById('project-type').value;
+  const det  = document.getElementById('project-details').value.trim();
+  const s = encodeURIComponent(`Project Inquiry: ${type} — from ${name}`);
+  const b = encodeURIComponent(`Hi Mr Dulal,\n\nName: ${name}\nCategory: ${type}\n\nDetails:\n${det}`);
+  window.location.href = `mailto:dulaldeveloper@gmail.com?subject=${s}&body=${b}`;
+}
+
+// ---------- command palette ----------
+const palette = document.getElementById('palette');
+const palInput = document.getElementById('palette-input');
+const palList = document.getElementById('palette-list');
+const commands = [
+  { icon:'fa-user', c:'goto', title:'./about — hero & bio', run:()=>go('#about') },
+  { icon:'fa-layer-group', c:'goto', title:'./projects — deployed systems', run:()=>go('#projects') },
+  { icon:'fa-diagram-project', c:'goto', title:'./systems — TgFlow architecture', run:()=>go('#architecture') },
+  { icon:'fa-terminal', c:'goto', title:'./stack — tech & tools', run:()=>go('#skills') },
+  { icon:'fa-envelope', c:'goto', title:'./contact — hire me', run:()=>go('#contact') },
+  { icon:'fa-telegram', c:'exec', title:'open @MrDulal on Telegram', run:()=>window.open('https://t.me/MrDulal','_blank') },
+  { icon:'fa-envelope-open-text', c:'exec', title:'copy email address', run:()=>copyText('dulaldeveloper@gmail.com','Email copied') },
+  { icon:'fa-brands fa-github', c:'exec', title:'open GitHub profile', run:()=>window.open('https://github.com/sadinhossain139-max/','_blank') },
+  { icon:'fa-robot', c:'exec', title:'inspect TgFlow system', run:()=>openProjectModal('TgFlow') },
+  { icon:'fa-microchip', c:'exec', title:'inspect Agent system', run:()=>openProjectModal('Agent') },
+];
+function go(sel){ document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); closePalette(); }
+function renderPal(q=''){
+  const ql = q.toLowerCase();
+  const items = commands.filter(c=>c.title.toLowerCase().includes(ql));
+  palList.innerHTML = items.length ? items.map((c,i)=>`
+    <div class="pal-item ${i===0?'active':''}" data-i="${commands.indexOf(c)}">
+      <i class="fa-solid ${c.icon} text-phos w-5 text-center"></i>
+      <span class="pal-title text-sm text-ghost flex-1 font-mono">${c.title}</span>
+      <span class="tag">${c.c}</span>
+    </div>`).join('')
+    : `<div class="px-5 py-6 font-mono text-xs text-fog">no match — try "hire", "projects", "tgflow"…</div>`;
+  palList.querySelectorAll('.pal-item').forEach(el=>{
+    el.addEventListener('click', ()=>commands[+el.dataset.i].run());
+  });
+}
+function togglePalette(){
+  palette.classList.toggle('open');
+  if(palette.classList.contains('open')){ renderPal(); palInput.value=''; setTimeout(()=>palInput.focus(),50); }
+}
+function closePalette(){ palette.classList.remove('open'); }
+palInput.addEventListener('input', ()=>renderPal(palInput.value));
+palInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){
+    const first = palList.querySelector('.pal-item');
+    if(first) commands[+first.dataset.i].run();
+  }
+});
+addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); togglePalette(); }
+  if(e.key==='Escape') closePalette();
+});
+palette.addEventListener('click', e=>{ if(e.target===palette) closePalette(); });
+
+// ---------- footer uptime ticker ----------
+let secs = 0;
+setInterval(()=>{
+  secs++;
+  const h = String(Math.floor(secs/3600)).padStart(2,'0'),
+        m = String(Math.floor(secs/60)%60).padStart(2,'0'),
+        s = String(secs%60).padStart(2,'0');
+  const el = document.getElementById('uptime-ticker');
+  if(el) el.textContent = `● session ${h}:${m}:${s}`;
+}, 1000);
+</script>
+</body>
+</html>
